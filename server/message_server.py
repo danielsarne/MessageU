@@ -2,7 +2,10 @@ import socket
 import selectors
 import threading
 from consts import *
+import logging
 from client_request import ClientRequest
+
+logger = logging.getLogger(__name__)
 
 
 class MessageServer:
@@ -14,14 +17,15 @@ class MessageServer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind(("0.0.0.0", self.port))
         self.socket.settimeout(1)
-        self.clients = []
-        self.db_manager = DBManager("clients.db")
+        self.db_manager = DBManager("server.db")
+        logging.info("server starting running")
 
     def run(self):
         while True:
-            client_conn = self.socket.accept()
-            client_handler = ClientRequest(client_conn)
-            client_thread = threading.Thread(client_handler.handle)
+            client_conn, addr = self.socket.accept()
+            logger.info("recieved another client request")
+            client_handler = ClientRequest(client_conn, self)
+            client_thread = threading.Thread(target=client_handler.parse)
             client_thread.run()
 
     def user_exists(self, username):
