@@ -2,12 +2,8 @@ import socket
 import selectors
 import threading
 from consts import *
-from db_manager import DBManger
-from client_request import ClientHandler
+from client_request import ClientRequest
 
-
-class ServerError(Exception):
-    pass
 
 class MessageServer:
     version = 2
@@ -19,11 +15,17 @@ class MessageServer:
         self.socket.bind(("0.0.0.0", self.port))
         self.socket.settimeout(1)
         self.clients = []
-        self.db_manager = DBManger("clients.db")
+        self.db_manager = DBManager("clients.db")
 
     def run(self):
         while True:
             client_conn = self.socket.accept()
-            client_handler = ClientHandler(client_conn)
+            client_handler = ClientRequest(client_conn)
             client_thread = threading.Thread(client_handler.handle)
             client_thread.run()
+
+    def user_exists(self, username):
+        pass
+
+    def register_user(self, username):
+        pass
