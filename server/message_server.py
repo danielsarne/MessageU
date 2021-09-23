@@ -1,9 +1,10 @@
 import socket
-import selectors
+from hashlib import md5
 import threading
 from consts import *
 import logging
 from client_request import ClientRequest
+from db_manager import DBManager
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,8 @@ class MessageServer:
             client_thread.run()
 
     def user_exists(self, username):
-        pass
+        return self.db_manager.user_exists(username)
 
-    def register_user(self, username):
-        pass
+    def register_user(self, username, public_key):
+        uid = int(md5(username).hexdigest(), 16)
+        self.db_manager.register_user(uid, username, public_key)

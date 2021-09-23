@@ -24,7 +24,7 @@ class ClientRequest:
     def recv_request(self):
         # type: () -> None
         header_data = self.socket.recv(UUID_LENGTH)
-        self.uuid, self.version, self.code, self.payload_size = struct.unpack("<8sBHI", header_data)
+        self.uid, self.version, self.code, self.payload_size = struct.unpack("<8sBHI", header_data)
         if self.payload_size is 0:
             return
         self.get_payload()
@@ -44,9 +44,9 @@ class ClientRequest:
     def parse(self):
         try:
             self.recv_request()
-            if self.uuid not in client_locks:
-                client_locks[self.uuid] = Lock()
-            with client_locks[self.uuid]:
+            if self.uid not in client_locks:
+                client_locks[self.uid] = Lock()
+            with client_locks[self.uid]:
                 request_handler = self.request_handlers[self.code](self)
                 request_handler.handle()
         except ServerError as e:
