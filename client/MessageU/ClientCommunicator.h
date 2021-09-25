@@ -7,16 +7,23 @@
 using namespace std;
 using  boost::asio::ip::tcp;
 
+const int MAX_REPLY_SEGMENT_LEN = 2048;
+
 class ClientCommunicator
 {
 private:
-	tcp::socket socket;
+	string serverAddr;
+	string serverPort;
+	tcp::iostream iostream;
 	void sendBytes(string bytes);
-	string getBytes();
+	string getBytes(int length);
 	/*
 	 * The function closes the socket and opens a new one.
      */
 	void connect();
+
+	void close();
+
 	// void sendRequest();
 	ServerReply getServerReply();
 	void recvReplyHeader();
@@ -26,10 +33,10 @@ private:
 	void recvReplyPayload(const unsigned int size);
 public:
 	ClientCommunicator();
-
 	/*
 	 * The function gets a request and returns the server reply.
 	 */
+	void test();
 	ServerReply makeRequest(Request request);
 };
 
