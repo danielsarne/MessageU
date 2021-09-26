@@ -2,7 +2,15 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <boost/asio.hpp>
+
+#define read_from_stream(stream, var) \
+        stream.read(reinterpret_cast<char*>(&(var)), sizeof(var))
+
+#define read_from_stream_to_string(stream, var, size) \
+        var = string(size, '\0'); \
+        stream.read(&var[0], size)
 
 ClientCommunicator::ClientCommunicator() {
 	string serverInfoStr;
@@ -26,21 +34,22 @@ void ClientCommunicator::close() {
 	this->iostream.close();
 }
 
-void ClientCommunicator::sendBytes(string bytes) {
-	this->iostream << bytes;
+ServerReply ClientCommunicator::getServerReply() {
+	ServerReply serverReply;
+	read_from_stream(this->iostream, serverReply.version);
+	read_from_stream(this->iostream, serverReply.code);
+	read_from_stream(this->iostream, serverReply.payloadSize);
+	if (serverReply.payloadSize > 0) {
+		cout << serverReply.payloadSize << endl;
+		read_from_stream_to_string(this->iostream, serverReply.payload, serverReply.payloadSize);
+	}
+	return serverReply;
 }
 
-string ClientCommunicator::getBytes(int length) {
-	string buf(length, '\0');
-	this->iostream.read(&buf[0], length);
-	return buf;
-}
-
-void ClientCommunicator::test() {
+ServerReply ClientCommunicator::makeRequest(Request request) {
 	this->connect();
-	this->sendBytes("Hello little fucker 8======D");
-	cout << "receieved: " << this->getBytes(100) << endl;
+	this->iostream << request.packed();
+	ServerReply serverReply = this->getServerReply();
 	this->close();
+	return serverReply;
 }
-
-

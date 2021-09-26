@@ -15,8 +15,7 @@ private:
 	string serverAddr;
 	string serverPort;
 	tcp::iostream iostream;
-	void sendBytes(string bytes);
-	string getBytes(int length);
+	
 	/*
 	 * The function closes the socket and opens a new one.
      */
@@ -36,7 +35,6 @@ public:
 	/*
 	 * The function gets a request and returns the server reply.
 	 */
-	void test();
 	ServerReply makeRequest(Request request);
 };
 
