@@ -17,7 +17,12 @@ void testRequest() {
 	cout << "server reply:" << sr.code << sr.version  << sr.payloadSize << endl;
 }
 
+void testUserInter() {
+	return;
+}
+
 int main() {
 	// testComm();
-	testRequest();
+	// testRequest();
+	testUserInter()
 }
