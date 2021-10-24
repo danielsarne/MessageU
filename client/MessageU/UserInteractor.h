@@ -9,14 +9,16 @@ using namespace std;
 class UserInteractor
 {
 private:
-	map<int, string> options;
 	void printOptions();
+
 public:
-	UserInteractor(vector<RequestBuilder> requestBuilders);
+	UserInteractor(vector<RequestBuilder*>& requestBuilders);
 	/**
 	 * The function prints the query and gets the user reply.
 	 */
-	string getUserStringReply(string query);
+	template <typename T> 
+	void getUserStringReply(string query, T reply);
+	map<int, RequestBuilder*> requestBuildersMap;
 
 	int getMainMenuUserReply();
 };
