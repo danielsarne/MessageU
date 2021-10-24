@@ -34,8 +34,11 @@ using namespace std;
 
 class RequestBuilder
 {
+protected:
+	string getPrivateKeyFromInfoFile();
+	string getUsernameFromInfoFile();
+	string getClientIDFromInfoFile();
 public: 
-	RequestBuilder(string clientID, unsigned char version, unsigned int code);
 	// in this version the builder gets the other params from the me.info file.
 	RequestBuilder(unsigned int code);
 	unsigned int code;
@@ -64,6 +67,14 @@ public:
 	 * The function takes the user info and writes it to the me.info file.
 	 */
 	void saveToInfoFile(string username, string publicKey, string ClientID);
+};
+
+class GetClientListRequestBuilder : public RequestBuilder {
+public:
+	unsigned int code = CLIENT_LIST_CODE;
+	virtual unsigned int getUserInpuId() const { return CLIENT_LIST_USER_INPUT_ID; }
+	virtual string getMenuString() const { return "Get The list of clients from the server."; }
+
 };
 
 class GetClientKeyRequestBuilder : public RequestBuilder {

@@ -1,10 +1,12 @@
 #include "RequestBuilder.h"
+#include "Base64Wrapper.h"
 #include "Request.h"
 #include "RSAWrapper.h"
 #include <iostream>
 #include <filesystem>
 #include <fstream>
-#include <boost/beast/core/detail/base64.hpp>
+#include <boost/format.hpp>
+
 
 string generateRandomBytes(int len) {
 	string randomString;
@@ -17,7 +19,7 @@ string generateRandomBytes(int len) {
 	return randomString;
 }
 
-RequestBuilder::RequestBuilder(unsigned int code): clientID(clientID), code(code){
+RequestBuilder::RequestBuilder(unsigned int code): code(code){
 }
 
 SignUpRequestBuilder::SignUpRequestBuilder(): RequestBuilder(this->code) {
@@ -35,15 +37,40 @@ string SignUpRequestBuilder::getNameFromUser() {
 	}	
 	return username;
 }
+string getLineFromIndex(string filename, int index) {
+	string line;
+	ifstream file(filename);
+	for (int lineno = 0; getline(file, line) && lineno < index; lineno++)
+		if (lineno == index)
+			return line;
+	throw exception("error reading from file.");
+}
+string RequestBuilder::getPrivateKeyFromInfoFile() {
+	string privateKey;
+	string privateKeyHex = getLineFromIndex(USER_INFO_FILE_NAME, 1);
+	for (auto iter = privateKey.begin(); iter + 2 != privateKey.end(); iter += 2) {
+		string chr = string(iter, iter + 2);
+		privateKey.push_back(stoi(chr, nullptr, 16));
+	}
+	return privateKey;
+}
+string RequestBuilder::getClientIDFromInfoFile() {
+	return Base64Wrapper::decode(getLineFromIndex(USER_INFO_FILE_NAME, 2));
+}
 
-void SignUpRequestBuilder::saveToInfoFile(string username, string publicKey, string clientID) {
-	filesystem::path infoPath(USER_INFO_FILE_NAME);
-	ofstream infoFile(infoPath);
+string RequestBuilder::getUsernameFromInfoFile() {
+	return getLineFromIndex(USER_INFO_FILE_NAME, 0);
+}
+
+
+void SignUpRequestBuilder::saveToInfoFile(string username, string privateKey, string clientID) {
+	ofstream infoFile(USER_INFO_FILE_NAME);
 	infoFile << username << endl;
-	infoFile << publicKey << endl;
-	infoFile << clientID << endl;
-
-	// TODO write clientID and publickey in hex and base64.
+	for (const unsigned char& ch : privateKey) {
+		infoFile << setfill('0') << setw(2) << hex << int(ch);
+	}
+	infoFile << endl;
+	infoFile << Base64Wrapper::encode(clientID) << endl;
 }
 
 string SignUpRequestBuilder::generatePublicKey() {
