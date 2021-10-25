@@ -1,7 +1,7 @@
 import struct
 import socket
 from threading import Lock
-from request_handler import SignUpRequestHandler
+from request_handler import SignUpRequestHandler, GetClientListHandler
 from exceptions import ServerError
 from reply import GeneralServerErrorReply
 from consts import *
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class ClientRequest:
-    REQUESTS = [SignUpRequestHandler, ]
+    REQUESTS = [SignUpRequestHandler, GetClientListHandler, ]
     request_handlers = dict([(request.code, request) for request in REQUESTS])
 
     def __init__(self, socket: socket.socket, server):

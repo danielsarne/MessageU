@@ -2,12 +2,15 @@ import socket
 from hashlib import md5
 from binascii import a2b_hex
 import threading
+from collections import namedtuple
 from consts import *
 import logging
 from client_request import ClientRequest
 from db_manager import DBManager
 
 logger = logging.getLogger(__name__)
+
+Client = namedtuple("Client", ["uid", "name"])
 
 
 class MessageServer:
@@ -32,6 +35,13 @@ class MessageServer:
 
     def user_exists(self, username):
         return self.db_manager.user_exists(username)
+
+    def uid_exists(self, uid):
+        return self.db_manager.user_exists(uid)
+
+    def get_clients(self):
+        db_clients_list = self.db_manager.get_clients()
+        return [Client(client_entry[0], client_entry[1]) for client_entry in db_clients_list]
 
     def register_user(self, username, public_key):
         uid = a2b_hex(md5(username.encode("utf-8")).hexdigest().encode("utf-8"))

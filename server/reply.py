@@ -5,6 +5,7 @@ from consts import SERVER_VERSION, UUID_LENGTH
 
 class ServerReply:
     version = SERVER_VERSION
+
     def __init__(self, payload):
         self.payload = payload
 
@@ -28,5 +29,14 @@ class GeneralServerErrorReply(ServerReply):
 class SuccessfullSignupReply(ServerReply):
     code = 2000
 
-    def __init__(self, uid):
-        self.payload = uid
+
+class ClientListReply(ServerReply):
+    code = 2001
+
+    def __init__(self, clients):
+        self.payload = b''
+        for client in clients:
+            padded_name = client.name.ljust(255, '\0')
+            self.payload += client.uid
+            self.payload += padded_name.encode()
+

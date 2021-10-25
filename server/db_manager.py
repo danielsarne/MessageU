@@ -26,6 +26,12 @@ class DBManager:
     def user_exists(self, username):
         return self.cur.execute("SELECT ID FROM clients WHERE name=?", tuple([username])).fetchall() != []
 
+    def uid_exists(self, uid: bytearray):
+        return self.cur.execute("SELECT ID FROM clients WHERE id=?", tuple([uid])).fetchall() != []
+
+    def get_clients(self):
+        return self.cur.execute("SELECT * FROM clients").fetchall()
+
     def register_user(self, uid, username, public_key):
         self.cur.execute("INSERT INTO clients VALUES (?, ?, ?, ?)",
                          (uid, username, public_key, int(time.time())))
