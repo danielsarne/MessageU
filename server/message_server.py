@@ -1,5 +1,6 @@
 import socket
 from hashlib import md5
+from binascii import a2b_hex
 import threading
 from consts import *
 import logging
@@ -10,14 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 class MessageServer:
-    version = 2
+    version = SERVER_VERSION
 
     def __init__(self):
         with open(SERVER_PORT_PATH, "r") as port_file:
             self.port = int(port_file.read())
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind(("0.0.0.0", self.port))
-        self.socket.settimeout(1)
+        self.socket.listen(5)
         self.db_manager = DBManager("server.db")
         logging.info("server starting running")
 
@@ -33,5 +34,6 @@ class MessageServer:
         return self.db_manager.user_exists(username)
 
     def register_user(self, username, public_key):
-        uid = int(md5(username).hexdigest(), 16)
+        uid = a2b_hex(md5(username.encode("utf-8")).hexdigest().encode("utf-8"))
         self.db_manager.register_user(uid, username, public_key)
+        return uid

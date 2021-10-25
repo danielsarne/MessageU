@@ -17,7 +17,7 @@ class DBManager:
 
     def _create_client_table(self):
         self.cur.execute("""CREATE TABLE `clients` (
-    `id`	INTEGER NOT NULL UNIQUE,
+    `id`	BLOB NOT NULL UNIQUE,
     `name`	TEXT NOT NULL UNIQUE,
     `public_key`	BLOB NOT NULL,
     `last_seen`	INTEGER NOT NULL,

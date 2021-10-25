@@ -1,8 +1,9 @@
 import struct
 import socket
-from threading import Thread, Lock
+from threading import Lock
 from request_handler import SignUpRequestHandler
-from message_server import ServerError
+from exceptions import ServerError
+from reply import GeneralServerErrorReply
 from consts import *
 import logging
 
@@ -15,17 +16,18 @@ class ClientRequest:
     REQUESTS = [SignUpRequestHandler, ]
     request_handlers = dict([(request.code, request) for request in REQUESTS])
 
-    def __init__(self, socket, server):
-        # type: (socket.socket) -> ClientHandler
+    def __init__(self, socket: socket.socket, server):
         self.socket = socket
         self.server = server
-        self.payload = ""
+        self.payload = b''
 
     def recv_request(self):
         # type: () -> None
-        header_data = self.socket.recv(UUID_LENGTH)
-        self.uid, self.version, self.code, self.payload_size = struct.unpack("<8sBHI", header_data)
-        if self.payload_size is 0:
+        header_data = self.socket.recv(HEADER_LENGTH)
+        print(len(header_data), header_data)
+        self.uid, self.version, self.code, self.payload_size = struct.unpack("<16sBHI", header_data)
+        print(self.uid, self.version, self.code, self.payload_size)
+        if self.payload_size == 0:
             return
         self.get_payload()
 
@@ -48,7 +50,8 @@ class ClientRequest:
                 client_locks[self.uid] = Lock()
             with client_locks[self.uid]:
                 request_handler = self.request_handlers[self.code](self)
-                request_handler.handle()
+                reply = request_handler.handle()
+                self.socket.send(reply.get_bytes())
         except ServerError as e:
             logger.error(e)
-            self.socket.send(GeneralServerError().get_bytes())
+            self.socket.send(GeneralServerErrorReply().get_bytes())
