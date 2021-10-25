@@ -40,7 +40,6 @@ ServerReply ClientCommunicator::getServerReply() {
 	read_from_stream(this->iostream, serverReply.code);
 	read_from_stream(this->iostream, serverReply.payloadSize);
 	if (serverReply.payloadSize > 0) {
-		cout << serverReply.payloadSize << endl;
 		read_from_stream_to_string(this->iostream, serverReply.payload, serverReply.payloadSize);
 	}
 	return serverReply;

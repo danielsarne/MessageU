@@ -2,6 +2,7 @@
 #include "Base64Wrapper.h"
 #include "Request.h"
 #include "RSAWrapper.h"
+#include "Consts.h"
 #include <iostream>
 #include <filesystem>
 #include <fstream>
@@ -22,8 +23,9 @@ string generateRandomBytes(int len) {
 RequestBuilder::RequestBuilder(unsigned int code): code(code){
 }
 
-SignUpRequestBuilder::SignUpRequestBuilder(): RequestBuilder(this->code) {
-
+Request RequestBuilder::build() {
+	this->clientID = this->getClientIDFromInfoFile();
+	return Request(this->clientID, this->version, this->code);
 }
 
 string SignUpRequestBuilder::getNameFromUser() {
@@ -35,14 +37,17 @@ string SignUpRequestBuilder::getNameFromUser() {
 		cout << "enter username ==>";
 		cin >> username;
 	}	
+	username.insert(username.size() - 1, MAX_USERNAME_LEN - username.size() + 1, '\0');
 	return username;
 }
 string getLineFromIndex(string filename, int index) {
 	string line;
 	ifstream file(filename);
-	for (int lineno = 0; getline(file, line) && lineno < index; lineno++)
-		if (lineno == index)
+	for (int lineno = 0; getline(file, line); lineno++) {
+		if (lineno == index) {
 			return line;
+		}
+	}
 	throw exception("error reading from file.");
 }
 string RequestBuilder::getPrivateKeyFromInfoFile() {
@@ -63,18 +68,13 @@ string RequestBuilder::getUsernameFromInfoFile() {
 }
 
 
-void SignUpRequestBuilder::saveToInfoFile(string username, string privateKey, string clientID) {
+void SignUpRequestBuilder::saveGeneratedInfoToFile(const string username, const string privateKey) {
 	ofstream infoFile(USER_INFO_FILE_NAME);
 	infoFile << username << endl;
 	for (const unsigned char& ch : privateKey) {
 		infoFile << setfill('0') << setw(2) << hex << int(ch);
 	}
 	infoFile << endl;
-	infoFile << Base64Wrapper::encode(clientID) << endl;
-}
-
-string SignUpRequestBuilder::generatePublicKey() {
-	return "";
 }
 
 string SignUpRequestBuilder::generateUUID() {
@@ -87,7 +87,7 @@ Request SignUpRequestBuilder::build() {
 	string name = getNameFromUser();
 	string publicKey = privateKey.getPublicKey();
 	this->clientID = generateUUID();
-	this->saveToInfoFile(name, privateKey.getPrivateKey(), this->clientID);
+	this->saveGeneratedInfoToFile(name, privateKey.getPrivateKey());
 	string payload = name + publicKey;
 	return Request(this->clientID, this->version, this->code, payload);
 }

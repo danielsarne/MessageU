@@ -24,13 +24,7 @@ using namespace std;
 #define SEND_CLIENT_SYM_KEY_USER_INPUT_ID 52
 
 
-#define PUBLIC_KEY_LEN 160
-#define UUID_LEN 128
 
-
-
-#define MAX_USERNAME_LEN 254
-#define USER_INFO_FILE_NAME "me.info"
 
 class RequestBuilder
 {
@@ -46,7 +40,7 @@ public:
 	string clientID;
 	virtual unsigned int getUserInpuId() const { return 0; }
 	virtual string getMenuString() const { return ""; };
-	virtual Request build() = 0;
+	virtual Request build();
 };
 
 class SignUpRequestBuilder : public RequestBuilder {
@@ -55,8 +49,7 @@ private:
 
 
 public:
-	SignUpRequestBuilder();
-	unsigned int code = SIGNUP_CODE;
+	SignUpRequestBuilder() : RequestBuilder(SIGNUP_CODE) {}
 	virtual Request build();
 	virtual unsigned int getUserInpuId() const { return SIGNUP_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Signup to the application"; }
@@ -66,12 +59,12 @@ public:
 	/*
 	 * The function takes the user info and writes it to the me.info file.
 	 */
-	void saveToInfoFile(string username, string publicKey, string ClientID);
+	void saveGeneratedInfoToFile(string username, string publicKey);
 };
 
 class GetClientListRequestBuilder : public RequestBuilder {
 public:
-	unsigned int code = CLIENT_LIST_CODE;
+	GetClientListRequestBuilder() : RequestBuilder(CLIENT_LIST_CODE) {}
 	virtual unsigned int getUserInpuId() const { return CLIENT_LIST_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Get The list of clients from the server."; }
 

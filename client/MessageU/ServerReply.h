@@ -3,6 +3,8 @@
 #include <stdio.h>
 
 #define SIGNUP_SUCCESSFULL_CODE 2000
+#define GOT_CLIENT_LIST_CODE 2001
+
 #define GENERAL_ERROR_CODE 9000
 
 using namespace std;

@@ -13,7 +13,7 @@ private:
 	unsigned int payloadSize;
 	string payload;
 public:
-	Request(string clientID, unsigned char version, unsigned short code, string payload);
+	Request(string clientID, unsigned char version, unsigned short code, string payload="");
 	/*
 	 * The function returns a byte representation of the request
 	 */
