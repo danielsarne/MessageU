@@ -1,5 +1,6 @@
 #include "UserInteractor.h"
 #include "RequestBuilder.h"
+#include "Consts.h"
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -26,6 +27,21 @@ void UserInteractor::printOptions() {
 		cout << item.first << " : " << item.second->getMenuString() << endl;
 	}
 }
+
+string UserInteractor::getNameFromUser() {
+	string username;
+	cout << "enter username ==>";
+	cin >> username;
+	while (username.size() > MAX_USERNAME_LEN) {
+		cout << "Username should be shorter then " << MAX_USERNAME_LEN << "chars." << endl;
+		cout << "enter username ==>";
+		cin >> username;
+	}
+	// add padding to name with 0 as described in the protocol.
+	username.append(MAX_USERNAME_LEN - username.size() + 1, '\0');
+	return username;
+}
+
 int UserInteractor::getMainMenuUserReply() {
 	int option;
 	this->printOptions();

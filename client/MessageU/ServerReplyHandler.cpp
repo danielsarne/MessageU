@@ -33,3 +33,34 @@ vector<Client> ClientListReplyHandler::handle() {
 	}
 	return appClients;
 }
+
+
+ClientPublicKeyReplyHandler::ClientPublicKeyReplyHandler(string payload) {
+	this->publicKey = payload.substr(UUID_LEN, PUBLIC_KEY_LEN);
+}
+
+string ClientPublicKeyReplyHandler::handle() {
+	return this->publicKey;
+}
+
+vector<Message> PullMessagesReplyHandler::handle() {
+	vector<Message> messages;
+	int cursor = 0;
+	Message m;
+	while (cursor < this->payload.size()) {
+		m.srcClientID = this->payload.substr(cursor, UUID_LEN);
+		cursor += UUID_LEN;
+		// TODO: handle endianess.
+		m.srcClientID = reinterpret_cast<unsigned int>(this->payload.substr(cursor, sizeof(m.id)).c_str());
+		cursor += sizeof(m.id);
+		m.type = this->payload.c_str()[cursor];
+		cursor += sizeof(m.type);
+		m.id = reinterpret_cast<unsigned int>(this->payload.substr(cursor, sizeof(m.id)).c_str());
+		cursor += sizeof(m.contentSize);
+		m.content = this->payload.substr(cursor, m.contentSize);
+		cursor += m.contentSize;
+		cout << "Message:" << m.srcClientID << m.id << m.type << endl;
+		messages.push_back(m);
+	}
+	return messages;
+}

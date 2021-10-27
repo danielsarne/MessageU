@@ -2,8 +2,10 @@
 #include "Base64Wrapper.h"
 #include "Request.h"
 #include "RSAWrapper.h"
+#include "UserInteractor.h"
 #include "Consts.h"
 #include <iostream>
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <boost/format.hpp>
@@ -28,18 +30,7 @@ Request RequestBuilder::build() {
 	return Request(this->clientID, this->version, this->code);
 }
 
-string SignUpRequestBuilder::getNameFromUser() {
-	string username;
-	cout << "enter username ==>";
-	cin >> username;
-	while (username.size() > MAX_USERNAME_LEN) {
-		cout << "Username should be shorter then " << MAX_USERNAME_LEN << "chars." << endl;
-		cout << "enter username ==>";
-		cin >> username;
-	}	
-	username.insert(username.size() - 1, MAX_USERNAME_LEN - username.size() + 1, '\0');
-	return username;
-}
+
 string getLineFromIndex(string filename, int index) {
 	string line;
 	ifstream file(filename);
@@ -84,10 +75,23 @@ string SignUpRequestBuilder::generateUUID() {
 
 Request SignUpRequestBuilder::build() {
 	RSAPrivateWrapper privateKey;
-	string name = getNameFromUser();
+	string name = UserInteractor::getNameFromUser();
 	string publicKey = privateKey.getPublicKey();
 	this->clientID = generateUUID();
 	this->saveGeneratedInfoToFile(name, privateKey.getPrivateKey());
 	string payload = name + publicKey;
+	return Request(this->clientID, this->version, this->code, payload);
+}
+
+Request GetClientKeyRequestBuilder::build() {
+	this->clientID = this->getClientIDFromInfoFile();
+	string payload;
+	string name = UserInteractor::getNameFromUser();
+	while (find_if(this->clientList.begin(), this->clientList.end(), [name](Client c1) { return c1.name == name;}) == this->clientList.end()) {
+		cout << "Please Enter a name of a real user." << endl;
+		name = UserInteractor::getNameFromUser();
+	}
+	Client c = *find_if(this->clientList.begin(), this->clientList.end(), [=](Client c1) {return c1.name == name; });
+	payload = c.uid;
 	return Request(this->clientID, this->version, this->code, payload);
 }

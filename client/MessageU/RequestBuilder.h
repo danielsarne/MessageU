@@ -1,6 +1,8 @@
 #pragma once
 #include "Request.h"
+#include "Client.h"
 #include <string>
+#include <vector>
 using namespace std;
 
 #define SIGNUP_CODE 1000
@@ -53,7 +55,6 @@ public:
 	virtual Request build();
 	virtual unsigned int getUserInpuId() const { return SIGNUP_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Signup to the application"; }
-	string getNameFromUser();
 	string generatePublicKey();
 	string generateUUID();
 	/*
@@ -63,19 +64,31 @@ public:
 };
 
 class GetClientListRequestBuilder : public RequestBuilder {
+
 public:
 	GetClientListRequestBuilder() : RequestBuilder(CLIENT_LIST_CODE) {}
 	virtual unsigned int getUserInpuId() const { return CLIENT_LIST_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Get The list of clients from the server."; }
-
+	// virtual Request build();
 };
 
 class GetClientKeyRequestBuilder : public RequestBuilder {
+private:
+	vector<Client> clientList;
 public:
-	unsigned int code = GET_CLIENT_KEY_CODE;
+	GetClientKeyRequestBuilder(vector<Client> clientList) : RequestBuilder(GET_CLIENT_KEY_CODE), clientList(clientList) {}
 	virtual unsigned int getUserInpuId() const { return GET_CLIENT_KEY_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Get a client public key"; }
+	void setClientList(vector<Client> clientList) { this->clientList = clientList; }
+	virtual Request build();
+};
 
+class PullMessagesRequestBuilder : public RequestBuilder {
+
+public:
+	PullMessagesRequestBuilder() : RequestBuilder(PULL_MESSAGES_CODE) {}
+	virtual unsigned int getUserInpuId() const { return PULL_MESSAGES_USER_INPUT_ID; }
+	virtual string getMenuString() const { return "Pull messages from the server."; }
 };
 
 class AbstractMessageRequestBuilder : public RequestBuilder {

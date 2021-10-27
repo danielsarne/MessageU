@@ -26,26 +26,46 @@ void testUserInter() {
 	ClientCommunicator c;
 	SignUpRequestBuilder signup;
 	GetClientListRequestBuilder getClientList;
-	vector<RequestBuilder*> v = {&signup, &getClientList };
+	PullMessagesRequestBuilder pullMessages;
+	vector<Client> clientList;
+	vector<Message> messageList;
+	GetClientKeyRequestBuilder getClientPublicKey(clientList);
+	vector<RequestBuilder*> v = {&signup, &getClientList, &getClientPublicKey, &pullMessages};
 	UserInteractor u(v);
 	string uuid;
-	Request r = u.requestBuildersMap[u.getMainMenuUserReply()]->build();
-	cout << r.packed();
-	ServerReply sr = c.makeRequest(r);
-	switch (sr.code) {
-	case (SIGNUP_SUCCESSFULL_CODE):
-		SuccessfullSignUpReplyHandler(sr.payload).handle();
-		cout << "successfull signup." << endl;
-		break;
-	case (GOT_CLIENT_LIST_CODE):
-		ClientListReplyHandler(sr.payload).handle();
-		cout << "successfull got client list." << endl;
-		break;
-	case (GENERAL_ERROR_CODE):
-		cout << "got a general error code." << endl;
-		break;
-	default:
-		cout << "ALERT: got an unrecognized code." << endl;
+	while (true) {
+		Request r = u.requestBuildersMap[u.getMainMenuUserReply()]->build();
+		ServerReply sr = c.makeRequest(r);
+		switch (sr.code) {
+		case (SIGNUP_SUCCESSFULL_CODE):
+			SuccessfullSignUpReplyHandler(sr.payload).handle();
+			cout << "successfull signup." << endl;
+			break;
+		case (GOT_CLIENT_PUBLIC_KEY):
+			ClientPublicKeyReplyHandler(sr.payload).handle();
+			cout << "got client public key." << endl;
+			break;
+		case (GOT_CLIENT_LIST_CODE):
+			clientList = ClientListReplyHandler(sr.payload).handle();
+			getClientPublicKey = GetClientKeyRequestBuilder(clientList);
+			cout << "successfull got client list." << endl;
+			break;
+		case (GOT_INCOMING_MESSAGES):
+			messageList = PullMessagesReplyHandler(sr.payload).handle();
+			for (Message m: messageList)
+			{
+				cout << m << endl;
+			}
+
+			cout << "got Messages from server." << endl;
+
+			break;
+		case (GENERAL_ERROR_CODE):
+			cout << "got a general error code." << endl;
+			break;
+		default:
+			cout << "ALERT: got an unrecognized code" << sr.code << endl;
+		}
 	}
 }
 

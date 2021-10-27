@@ -21,5 +21,6 @@ public:
 	map<int, RequestBuilder*> requestBuildersMap;
 
 	int getMainMenuUserReply();
+	static string getNameFromUser();
 };
 
