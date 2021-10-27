@@ -6,9 +6,6 @@ from consts import SERVER_VERSION, UUID_LENGTH
 class ServerReply:
     version = SERVER_VERSION
 
-    def __init__(self, payload):
-        self.payload = payload
-
     def get_bytes(self):
         payload_len = len(self.payload)
         return struct.pack("<BHI{payload_len}s".format(payload_len=payload_len),
@@ -29,6 +26,9 @@ class GeneralServerErrorReply(ServerReply):
 class SuccessfullSignupReply(ServerReply):
     code = 2000
 
+    def __init__(self, uid):
+        self.payload = uid
+
 
 class ClientListReply(ServerReply):
     code = 2001
@@ -36,7 +36,26 @@ class ClientListReply(ServerReply):
     def __init__(self, clients):
         self.payload = b''
         for client in clients:
-            padded_name = client.name.ljust(255, '\0')
             self.payload += client.uid
-            self.payload += padded_name.encode()
+            self.payload += client.name.encode()
 
+
+class ClientPublicKeyReply(ServerReply):
+    code = 2002
+
+    def __init__(self, client):
+        self.payload = b''
+        self.payload += client.uid
+        self.payload += client.public_key
+
+
+class MessagesListReply(ServerReply):
+    code = 2004
+
+    def __init__(self, messages):
+        self.payload = b''
+        print(messages)
+        for message in messages:
+            self.payload += struct.pack("<16sIHI{content_size}s".format(content_size=len(message.content)),
+                                        message.src_client_uid, message.id, message.type, len(message.content),
+                                        message.content)

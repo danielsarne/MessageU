@@ -1,8 +1,9 @@
 import struct
 import abc
 from db_manager import DBManager
+import time
 from exceptions import UserExists, UserDoesNotExists
-from reply import ServerReply, SuccessfullSignupReply, ClientListReply
+from reply import ServerReply, SuccessfullSignupReply, ClientListReply, ClientPublicKeyReply, MessagesListReply
 
 db_manager = DBManager("client.db")
 
@@ -22,11 +23,11 @@ class SignUpRequestHandler(RequestHandler):
 
     def __init__(self, request):
         super().__init__(request)
-        cname, self.public_key = struct.unpack("<255s160s", self.request.payload)
-        self.name = cname.decode("utf-8").split('\0')[0]
+        name, self.public_key = struct.unpack("<255s160s", self.request.payload)
+        self.name = name.decode("utf-8")
 
     def handle(self) -> ServerReply:
-        if self.server.user_exists(self.name):
+        if self.server.db_manager.user_exists(self.name):
             raise UserExists(self.name)
         else:
             uid = self.server.register_user(self.name, self.public_key)
@@ -41,8 +42,39 @@ class GetClientListHandler(RequestHandler):
         self.client_uid = request.uid
 
     def handle(self) -> ServerReply:
-        if self.server.uid_exists(self.client_uid):
-            raise UserDoesNotExists(self.client_uid.decode())
+        if not self.server.db_manager.uid_exists(self.client_uid):
+            raise UserDoesNotExists(self.client_uid)
         else:
-            clients = [client for client in self.server.get_clients() if client.uid != self.client_uid]
+            clients = [client for client in self.server.db_manager.get_clients() if client.uid != self.client_uid]
+            print(clients)
             return ClientListReply(clients)
+
+
+class GetClientPublicKeyHandler(RequestHandler):
+    code = 1002
+
+    def __init__(self, request):
+        super().__init__(request)
+        self.other_uid = request.payload
+
+    def handle(self) -> ServerReply:
+        if not self.server.db_manager.uid_exists(self.other_uid):
+            raise UserDoesNotExists(self.other_uid)
+        else:
+            client = self.server.db_manager.get_client_by_uid(self.other_uid)
+            return ClientPublicKeyReply(client)
+
+
+class PullMessagesHandler(RequestHandler):
+    code = 1004
+
+    def __init__(self, request):
+        super().__init__(request)
+        self.uid = request.uid
+
+    def handle(self) -> ServerReply:
+        if not self.server.db_manager.uid_exists(self.uid):
+            raise UserDoesNotExists(self.uid)
+        else:
+            messages = self.server.db_manager.pull_client_messages(self.uid)
+            return MessagesListReply(messages)
