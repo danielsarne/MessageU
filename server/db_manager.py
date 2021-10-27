@@ -54,9 +54,13 @@ class DBManager:
                          (uid, username, public_key, int(time.time())))
         self.connection.commit()
 
+    def register_message(self, message: Message):
+        self.cur.execute("INSERT INTO messages VALUES (?, ?, ?, ?, ?)",
+                         (message.id, message.dst_client_uid, message.src_client_uid, message.type, message.content))
+
     def pull_client_messages(self, uid):
         messages = [Message(*message_entry) for message_entry in
-                self.cur.execute("SELECT * FROM messages WHERE to_client=?", tuple([uid])).fetchall()]
+                    self.cur.execute("SELECT * FROM messages WHERE to_client=?", tuple([uid])).fetchall()]
         self.cur.execute("DELETE * FROM messages WHERE to_client=?", tuple([uid]))
         return messages
 

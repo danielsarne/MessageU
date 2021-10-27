@@ -1,6 +1,6 @@
 import struct
-import secrets
-from consts import SERVER_VERSION, UUID_LENGTH
+from message import Message
+from consts import SERVER_VERSION
 
 
 class ServerReply:
@@ -45,8 +45,15 @@ class ClientPublicKeyReply(ServerReply):
 
     def __init__(self, client):
         self.payload = b''
-        self.payload += client.uid
-        self.payload += client.public_key
+        self.payload += client.uid + client.public_key
+
+
+class MessageSentReply(ServerReply):
+    code = 2003
+
+    def __init__(self, message: Message):
+        self.payload = b''
+        self.payload += message.dst_client_uid + message.id
 
 
 class MessagesListReply(ServerReply):

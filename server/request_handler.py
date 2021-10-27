@@ -1,9 +1,10 @@
 import struct
 import abc
 from db_manager import DBManager
-import time
+from message import Message
 from exceptions import UserExists, UserDoesNotExists
-from reply import ServerReply, SuccessfullSignupReply, ClientListReply, ClientPublicKeyReply, MessagesListReply
+from reply import ServerReply, SuccessfullSignupReply, ClientListReply, ClientPublicKeyReply, MessagesListReply, \
+    MessageSentReply
 
 db_manager = DBManager("client.db")
 
@@ -63,6 +64,21 @@ class GetClientPublicKeyHandler(RequestHandler):
         else:
             client = self.server.db_manager.get_client_by_uid(self.other_uid)
             return ClientPublicKeyReply(client)
+
+
+class SendMessageHandler(RequestHandler):
+    code = 1003
+
+    def __init__(self, request):
+        super().__init__(request)
+
+    def handle(self) -> ServerReply:
+        if not self.server.db_manager.uid_exists(self.request.uid):
+            raise UserDoesNotExists(self.request.uid)
+        else:
+            m = Message.from_request(self.request)
+            self.server.db_manager.register_message(m)
+            return MessageSentReply(m)
 
 
 class PullMessagesHandler(RequestHandler):
