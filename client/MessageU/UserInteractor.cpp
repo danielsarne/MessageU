@@ -28,12 +28,36 @@ void UserInteractor::printOptions() {
 	}
 }
 
+
+Client* UserInteractor::getClientFromUser(vector<Client>& clientList) {
+	string name = UserInteractor::getNameFromUser();
+	while (find_if(clientList.begin(), clientList.end(), [name](Client c1) { return c1.name == name; }) == clientList.end()) {
+		cout << "Please Enter a name of a real user." << endl;
+		name = UserInteractor::getNameFromUser();
+	}
+	return &*find_if(clientList.begin(), clientList.end(), [=](Client c1) {return c1.name == name; });
+	
+}
+
+string UserInteractor::getMessageContentFromUser() {
+	string content;
+	cout << "enter a message ==>";
+	cin >> content;
+	while (content.size() > UINT_MAX) {
+		cout << "Message Should be shorter than " << UINT_MAX << " chars." << endl;
+		cout << "enter a message ==>";
+		cin >> content;
+	}
+	
+	return content;
+}
+
 string UserInteractor::getNameFromUser() {
 	string username;
 	cout << "enter username ==>";
 	cin >> username;
 	while (username.size() > MAX_USERNAME_LEN) {
-		cout << "Username should be shorter then " << MAX_USERNAME_LEN << "chars." << endl;
+		cout << "Username should be shorter then " << MAX_USERNAME_LEN << " chars." << endl;
 		cout << "enter username ==>";
 		cin >> username;
 	}

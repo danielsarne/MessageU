@@ -27,16 +27,19 @@ public:
 class ClientPublicKeyReplyHandler {
 private:
 	string publicKey;
+	Client* client;
 public:
 	const unsigned int code = 2002;
-	ClientPublicKeyReplyHandler(string payload);
-	string handle();
+	ClientPublicKeyReplyHandler(string payload, vector<Client>& clientList);
+	void handle();
 };
 
 class PullMessagesReplyHandler {	
 private:
+	string getPrivateKeyFromInfoFile();
 	string payload;
+	vector<Client>& clientList;
 public:
-	PullMessagesReplyHandler(string payload) : payload(payload) {}
+	PullMessagesReplyHandler(string payload, vector<Client>& clientList) : payload(payload),  clientList(clientList){}
 	vector<Message> handle();
 };

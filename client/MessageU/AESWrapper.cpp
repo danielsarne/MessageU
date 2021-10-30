@@ -3,7 +3,7 @@
 #include <modes.h>
 #include <aes.h>
 #include <filters.h>
-
+#include <iostream>
 #include <stdexcept>
 #include <immintrin.h>	// _rdrand32_step
 

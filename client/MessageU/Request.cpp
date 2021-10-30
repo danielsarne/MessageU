@@ -1,11 +1,8 @@
 #include "Request.h"
 #include <stdio.h>
 #include <string>
+#include <iostream>
 using namespace std;
-#define append_to_string(str, var) \
-	for(int i = 0; i < sizeof(var); i++) { \
-		str +=  reinterpret_cast<char *>(&(var))[i];	\
-	}
 	
 Request::Request(string clientID, unsigned char version, unsigned short code, string payload) : clientID(clientID), version(version), code(code), payload(payload), payloadSize(payload.length()){
 }

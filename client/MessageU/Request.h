@@ -2,6 +2,11 @@
 #pragma scalar_storage_order little-endian
 #include <stdio.h>
 #include <string>
+#define append_to_string(str, var) \
+	for(int i = 0; i < sizeof(var); i++) { \
+		str +=  reinterpret_cast<char *>(&(var))[i];	\
+	}
+
 using namespace std;
 
 class Request
@@ -11,12 +16,12 @@ private:
 	unsigned char version;
 	unsigned short code;
 	unsigned int payloadSize;
-	string payload;
 public:
 	Request(string clientID, unsigned char version, unsigned short code, string payload="");
 	/*
 	 * The function returns a byte representation of the request
 	 */
+	string payload;
 	string packed();
 };
 

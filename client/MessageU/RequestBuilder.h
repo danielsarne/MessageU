@@ -1,7 +1,9 @@
 #pragma once
 #include "Request.h"
 #include "Client.h"
+#include "Message.h"
 #include <string>
+#include <iomanip>
 #include <vector>
 using namespace std;
 
@@ -10,12 +12,6 @@ using namespace std;
 #define GET_CLIENT_KEY_CODE 1002
 #define PULL_MESSAGES_CODE 1004
 #define SEND_MESSAGE_CODE 1003
-
-
-#define GET_SYM_KEY_MESSAGE_TYPE_CODE 1
-#define SEND_SYM_KEY_MESSAGE_TYPE_CODE 2
-#define SEND_TEXT_MESSAGE_TYPE_CODE 3
-
 
 #define SIGNUP_USER_INPUT_ID 10
 #define CLIENT_LIST_USER_INPUT_ID 20
@@ -26,6 +22,9 @@ using namespace std;
 #define SEND_CLIENT_SYM_KEY_USER_INPUT_ID 52
 
 
+string getLineFromIndex(string filename, int index);
+
+void hexify(const unsigned char* buffer, unsigned int length);
 
 
 class RequestBuilder
@@ -69,7 +68,6 @@ public:
 	GetClientListRequestBuilder() : RequestBuilder(CLIENT_LIST_CODE) {}
 	virtual unsigned int getUserInpuId() const { return CLIENT_LIST_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Get The list of clients from the server."; }
-	// virtual Request build();
 };
 
 class GetClientKeyRequestBuilder : public RequestBuilder {
@@ -92,36 +90,41 @@ public:
 };
 
 class AbstractMessageRequestBuilder : public RequestBuilder {
-private:
-	string clientID;
-	unsigned char messageType;
-	string message;
+protected:
+	Message message;
+	vector<Client> &clientList;
 public:
+	AbstractMessageRequestBuilder(vector<Client>& clientList) : RequestBuilder(SEND_MESSAGE_CODE), clientList(clientList) {}
 	unsigned int code = SEND_MESSAGE_CODE;
 	virtual Request build();
 };
 
 class SendMessageRequestBuilder : public AbstractMessageRequestBuilder {
-private:
+protected:
 	unsigned char messageType = SEND_TEXT_MESSAGE_TYPE_CODE;
 public:
-	virtual Request build();
+	SendMessageRequestBuilder(vector<Client>& clientList) : AbstractMessageRequestBuilder(clientList) {}
 	virtual unsigned int getUserInpuId() const { return SEND_MESSAGE_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Send a message to another client"; }
+	virtual Request build();
 };
 
 class GetClientSymKeyRequestBuilder : public AbstractMessageRequestBuilder {
-private:
+protected:
 	unsigned char messageType = GET_SYM_KEY_MESSAGE_TYPE_CODE;
 public:
+	GetClientSymKeyRequestBuilder(vector<Client>& clientList) : AbstractMessageRequestBuilder(clientList) {}
 	virtual unsigned int getUserInpuId() const { return GET_CLIENT_SYM_KEY_USER_INPUT_ID; }
-	virtual string getMenuString() const { return "Get a client sym key"; }
+	virtual string getMenuString() const { return "Get a client sym key."; }
+	virtual Request build();
 };
 
 class SendClientSymKeyRequestBuilder : public AbstractMessageRequestBuilder {
-private:
+protected:
 	unsigned char messageType = SEND_SYM_KEY_MESSAGE_TYPE_CODE;
 public:
+	SendClientSymKeyRequestBuilder(vector<Client>& clientList) : AbstractMessageRequestBuilder(clientList) {}
 	virtual unsigned int getUserInpuId() const { return SEND_CLIENT_SYM_KEY_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Send a sym key to another client."; }
+	virtual Request build();
 };

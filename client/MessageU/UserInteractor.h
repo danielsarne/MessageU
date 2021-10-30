@@ -1,5 +1,6 @@
 #pragma once
 #include "RequestBuilder.h"
+#include "Client.h"
 #include <stdio.h>
 #include <string>
 #include <map>
@@ -22,5 +23,7 @@ public:
 
 	int getMainMenuUserReply();
 	static string getNameFromUser();
+	static string getMessageContentFromUser();
+	static Client* getClientFromUser(vector<Client>& clientList);
 };
 
