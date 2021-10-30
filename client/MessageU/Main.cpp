@@ -43,38 +43,50 @@ void testUserInter() {
 	UserInteractor u(v);
 	string uuid;
 	while (true) {
-		Request r = u.requestBuildersMap[u.getMainMenuUserReply()]->build();
-		ServerReply sr = c.makeRequest(r);
-		switch (sr.code) {
-		case (SIGNUP_SUCCESSFULL_CODE):
-			SuccessfullSignUpReplyHandler(sr.payload).handle();
-			cout << "successfull signup." << endl;
-			break;
-		case (GOT_CLIENT_PUBLIC_KEY):
-			ClientPublicKeyReplyHandler(sr.payload, clientList).handle();
-			cout << "got client public key." << endl;
-			break;
-		case (GOT_CLIENT_LIST_CODE):
-			clientList = ClientListReplyHandler(sr.payload).handle();
-			getClientPublicKey = GetClientKeyRequestBuilder(clientList);
-			cout << "successfull got client list." << endl;
-			break;
-		case (GOT_INCOMING_MESSAGES):
-			messageList = PullMessagesReplyHandler(sr.payload, clientList).handle();
-			for (Message m: messageList)
-			{
-				cout << m << endl;
+		try {
+			int userInput = u.getMainMenuUserReply();
+			if (userInput == QUIT_APP_INT) {
+				cout << "bye bye darling." << endl;
+				break;
 			}
-			cout << "got Messages from server." << endl;
-			break;
-		case(MESSAGE_SENT_SUCCESSFULLY):
-			cout << "message was sent successfully." << endl;
-			break;
-		case (GENERAL_ERROR_CODE):
-			cout << "got a general error code." << endl;
-			break;
-		default:
-			cout << "ALERT: got an unrecognized code" << sr.code << endl;
+			Request r = u.requestBuildersMap[userInput]->build();
+			ServerReply sr = c.makeRequest(r);
+			switch (sr.code) {
+			case (SIGNUP_SUCCESSFULL_CODE):
+				SuccessfullSignUpReplyHandler(sr.payload).handle();
+				cout << "successfull signup." << endl;
+				break;
+			case (GOT_CLIENT_PUBLIC_KEY):
+				ClientPublicKeyReplyHandler(sr.payload, clientList).handle();
+				cout << "got client public key." << endl;
+				break;
+			case (GOT_CLIENT_LIST_CODE):
+				clientList = ClientListReplyHandler(sr.payload).handle();
+				cout << "Got client list from server." << endl;
+				for (Client client : clientList) {
+					cout << "- " << client.name << endl;
+				}
+				break;
+			case (GOT_INCOMING_MESSAGES):
+				messageList = PullMessagesReplyHandler(sr.payload, clientList).handle();
+				for (Message m : messageList)
+				{
+					cout << m << endl;
+				}
+				cout << "got Messages from server." << endl;
+				break;
+			case(MESSAGE_SENT_SUCCESSFULLY):
+				cout << "message was sent successfully." << endl;
+				break;
+			case (GENERAL_ERROR_CODE):
+				cout << "got a general error code." << endl;
+				break;
+			default:
+				cout << "ALERT: got an unrecognized code" << sr.code << endl;
+			}
+		}
+		catch (exception& e) {
+			cerr << "got error: " << e.what() << endl;
 		}
 	}
 }
@@ -151,9 +163,6 @@ void testCryptoFunctions() {
 }
 
 int main() {
-	// testRequest();
-	// string priv = getPrivateKeyFromInfoFile();
-	// cout << priv.size() << endl;
-	// testCryptoFunctions();
+	
 	testUserInter();
 }

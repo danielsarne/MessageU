@@ -1,5 +1,4 @@
 #pragma once
-#pragma scalar_storage_order little-endian
 #include <stdio.h>
 
 #define SIGNUP_SUCCESSFULL_CODE 2000

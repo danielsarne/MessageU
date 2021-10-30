@@ -4,8 +4,20 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <exception>
 #include <map>
 
+bool getIntFromUser(int& output) {
+	try {
+		string input;
+		cin >> input;
+		output = std::stoi(input);
+	}
+	catch (std::invalid_argument) {
+		return false;
+	}
+	return true;
+}
 
 UserInteractor::UserInteractor(vector<RequestBuilder*>& requestBuilders): requestBuildersMap(){
 	for (const auto& requestBuilder : requestBuilders) {
@@ -32,7 +44,7 @@ void UserInteractor::printOptions() {
 Client* UserInteractor::getClientFromUser(vector<Client>& clientList) {
 	string name = UserInteractor::getNameFromUser();
 	while (find_if(clientList.begin(), clientList.end(), [name](Client c1) { return c1.name == name; }) == clientList.end()) {
-		cout << "Please Enter a name of a real user." << endl;
+		cout << "Please Enter a name of a real user, that isn't you." << endl;
 		name = UserInteractor::getNameFromUser();
 	}
 	return &*find_if(clientList.begin(), clientList.end(), [=](Client c1) {return c1.name == name; });
@@ -46,7 +58,7 @@ string UserInteractor::getMessageContentFromUser() {
 	while (content.size() > UINT_MAX) {
 		cout << "Message Should be shorter than " << UINT_MAX << " chars." << endl;
 		cout << "enter a message ==>";
-		cin >> content;
+		getline(cin, content);
 	}
 	
 	return content;
@@ -69,11 +81,8 @@ string UserInteractor::getNameFromUser() {
 int UserInteractor::getMainMenuUserReply() {
 	int option;
 	this->printOptions();
-	cin >> option;
-	while (this->requestBuildersMap.count(option) == 0) {
-		// TODO : make try catch in case user didn't enter number
-		cout << "Error in input, Must choose option from menu" << endl << "=>";
-		cin >> option;
+	while (!getIntFromUser(option) || (this->requestBuildersMap.count(option) == 0 && option != QUIT_APP_INT)) {
+		cerr << "Error in input, Must choose option from menu" << endl << "=>";
 	} 
 	return option;
 }

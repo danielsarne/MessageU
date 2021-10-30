@@ -5,6 +5,7 @@
 #include <string>
 #include <map>
 #include <vector>
+
 using namespace std;
 
 class UserInteractor
@@ -17,7 +18,7 @@ public:
 	/**
 	 * The function prints the query and gets the user reply.
 	 */
-	template <typename T> 
+	template <typename T>
 	void getUserStringReply(string query, T reply);
 	map<int, RequestBuilder*> requestBuildersMap;
 

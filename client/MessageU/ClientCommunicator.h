@@ -15,10 +15,10 @@ private:
 	string serverAddr;
 	string serverPort;
 	tcp::iostream iostream;
-	
+
 	/*
 	 * The function closes the socket and opens a new one.
-     */
+	 */
 	void connect();
 
 	void close();

@@ -14,15 +14,6 @@
 #include <boost/format.hpp>
 
 
-void hexify(const unsigned char* buffer, unsigned int length) {
-std::ios::fmtflags f(std::cout.flags());
-std::cout << std::hex;
-for (size_t i = 0; i < length; i++)
-	std::cout << setfill('0') << setw(2) << (0xFF & buffer[i]) << (((i + 1) % 16 == 0) ? "\n" : " ");
-std::cout << std::endl;
-std::cout.flags(f);
-}
-
 string generateRandomBytes(int len) {
 	string randomString;
 	char randomByteString;
@@ -34,7 +25,7 @@ string generateRandomBytes(int len) {
 	return randomString;
 }
 
-RequestBuilder::RequestBuilder(unsigned int code): code(code){
+RequestBuilder::RequestBuilder(unsigned short code): code(code){
 }
 
 Request RequestBuilder::build() {
@@ -69,7 +60,6 @@ void SignUpRequestBuilder::saveGeneratedInfoToFile(const string username, const 
 	for (const unsigned char& ch : privateKey) {
 		infoFile << setfill('0') << setw(2) << hex << int(ch);
 	}
-	cout << "DEBUG:: signup privateKey:" << privateKey << ";" << endl;
 	infoFile << endl;
 }
 
@@ -82,7 +72,6 @@ Request SignUpRequestBuilder::build() {
 	RSAPrivateWrapper privateKey;
 	string name = UserInteractor::getNameFromUser();
 	string publicKey = privateKey.getPublicKey();
-	cout << "generated public key" << publicKey <<";" << endl;
 	this->clientID = generateUUID();
 	this->saveGeneratedInfoToFile(name, privateKey.getPrivateKey());
 	string payload = name + publicKey;
@@ -113,19 +102,15 @@ Request GetClientSymKeyRequestBuilder::build() {
 Request SendClientSymKeyRequestBuilder::build() {
 	Client* peer = UserInteractor::getClientFromUser(this->clientList);
 	if (peer->publicKey.size() == 0) {
-		cout << "DEBUG::error, no public key" << endl;
 		throw exception("To send sym key you need to pull clients public asym key.(option 30)");
 	}
 	if (peer->symKey == nullptr) {
 		unsigned char key[AESWrapper::DEFAULT_KEYLENGTH];
 		peer->symKey = new unsigned char[AESWrapper::DEFAULT_KEYLENGTH];
 		memcpy_s(peer->symKey, AESWrapper::DEFAULT_KEYLENGTH,  AESWrapper::GenerateKey(key, AESWrapper::DEFAULT_KEYLENGTH), AESWrapper::DEFAULT_KEYLENGTH);
-		cout << "DEBUG:sent sym key from user. "; hexify(peer->symKey, AESWrapper::DEFAULT_KEYLENGTH); cout << endl;
-		cout << "DEBUG:updated key!" << endl;
 	}
 	RSAPublicWrapper rsapub(peer->publicKey);
 	this->message = Message(peer->uid, this->messageType, rsapub.encrypt(reinterpret_cast<char*>(peer->symKey), AESWrapper::DEFAULT_KEYLENGTH));
-	cout << "encrypted key" << this->message.content << endl;
 	return AbstractMessageRequestBuilder::build();
 
 }
@@ -133,20 +118,11 @@ Request SendClientSymKeyRequestBuilder::build() {
 Request SendMessageRequestBuilder::build() {
 	Client* peer = UserInteractor::getClientFromUser(this->clientList);
 	if (peer->symKey == nullptr) {
-		cout << "DEBUG: peer symkey is NULL" << endl;
 		throw exception("To send a message you need to get client's sym key.(option 51)");
 	}
-	// TOO handle it right.s
-	cout << "DEBUG: First key." << *peer->symKey << endl;
 	AESWrapper aesEncryptor(peer->symKey, AESWrapper::DEFAULT_KEYLENGTH);
 	string messageContent = UserInteractor::getMessageContentFromUser();
-	/// <summary>
 	string encrypted = aesEncryptor.encrypt(messageContent.c_str(), messageContent.size()).c_str();
-	cout << "encrypted :" << endl; hexify((const unsigned char *)encrypted.c_str(), encrypted.size()); cout << endl;
-	cout << aesEncryptor.decrypt(encrypted.c_str(), encrypted.size()) << endl;
-	/// </summary>
-	/// <returns></returns>
-	
 	this->message = Message(peer->uid, this->messageType, aesEncryptor.encrypt(messageContent.c_str(), messageContent.size()));
 	return AbstractMessageRequestBuilder::build();
 }

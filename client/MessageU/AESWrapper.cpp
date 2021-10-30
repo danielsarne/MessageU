@@ -31,9 +31,9 @@ AESWrapper::~AESWrapper()
 {
 }
 
-const unsigned char* AESWrapper::getKey() const 
-{ 
-	return _key; 
+const unsigned char* AESWrapper::getKey() const
+{
+	return _key;
 }
 
 std::string AESWrapper::encrypt(const char* plain, unsigned int length)

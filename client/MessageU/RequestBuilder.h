@@ -33,10 +33,9 @@ protected:
 	string getPrivateKeyFromInfoFile();
 	string getUsernameFromInfoFile();
 	string getClientIDFromInfoFile();
-public: 
-	// in this version the builder gets the other params from the me.info file.
-	RequestBuilder(unsigned int code);
-	unsigned int code;
+public:
+	RequestBuilder(unsigned short code);
+	unsigned short code;
 	unsigned int version = 2;
 	string clientID;
 	virtual unsigned int getUserInpuId() const { return 0; }
@@ -72,12 +71,11 @@ public:
 
 class GetClientKeyRequestBuilder : public RequestBuilder {
 private:
-	vector<Client> clientList;
+	vector<Client>& clientList;
 public:
-	GetClientKeyRequestBuilder(vector<Client> clientList) : RequestBuilder(GET_CLIENT_KEY_CODE), clientList(clientList) {}
+	GetClientKeyRequestBuilder(vector<Client>& clientList) : RequestBuilder(GET_CLIENT_KEY_CODE), clientList(clientList) {}
 	virtual unsigned int getUserInpuId() const { return GET_CLIENT_KEY_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Get a client public key"; }
-	void setClientList(vector<Client> clientList) { this->clientList = clientList; }
 	virtual Request build();
 };
 
@@ -92,7 +90,7 @@ public:
 class AbstractMessageRequestBuilder : public RequestBuilder {
 protected:
 	Message message;
-	vector<Client> &clientList;
+	vector<Client>& clientList;
 public:
 	AbstractMessageRequestBuilder(vector<Client>& clientList) : RequestBuilder(SEND_MESSAGE_CODE), clientList(clientList) {}
 	unsigned int code = SEND_MESSAGE_CODE;

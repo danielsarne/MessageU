@@ -5,7 +5,7 @@
 #include <vector>
 using namespace std;
 
-class SuccessfullSignUpReplyHandler{
+class SuccessfullSignUpReplyHandler {
 private:
 	string uid;
 	static void saveClientIDToInfoFile(const string clientID);
@@ -15,7 +15,7 @@ public:
 	void handle();
 };
 
-class ClientListReplyHandler{
+class ClientListReplyHandler {
 private:
 	string payload;
 public:
@@ -34,12 +34,12 @@ public:
 	void handle();
 };
 
-class PullMessagesReplyHandler {	
+class PullMessagesReplyHandler {
 private:
 	string getPrivateKeyFromInfoFile();
 	string payload;
 	vector<Client>& clientList;
 public:
-	PullMessagesReplyHandler(string payload, vector<Client>& clientList) : payload(payload),  clientList(clientList){}
+	PullMessagesReplyHandler(string payload, vector<Client>& clientList) : payload(payload), clientList(clientList) {}
 	vector<Message> handle();
 };

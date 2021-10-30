@@ -44,7 +44,6 @@ ClientPublicKeyReplyHandler::ClientPublicKeyReplyHandler(string payload, vector<
 	string clientID = payload.substr(0, UUID_LEN);
 	this->client = &*find_if(clientList.begin(), clientList.end(), [=](Client c1) {return c1.uid == clientID; });
 	this->publicKey = payload.substr(UUID_LEN, PUBLIC_KEY_LEN);
-	cout << "DEBUG:got public Key:" << this->publicKey<< ";"<< endl;
 }
 
 void ClientPublicKeyReplyHandler::handle() {
@@ -60,7 +59,6 @@ string PullMessagesReplyHandler::getPrivateKeyFromInfoFile() {
 		char chr = (char)(int)strtol(byte.c_str(), nullptr, 16);
 		privateKey.push_back(chr);
 	}
-	cout << "DEBUG private Key from file:" << privateKey << ";" << endl;
 	return privateKey;
 
 }
@@ -78,33 +76,26 @@ vector<Message> PullMessagesReplyHandler::handle() {
 		m.srcClientName = srcClient->name;
 		cursor += sizeof(m.id);
 		m.type = this->payload.c_str()[cursor];
-		cout << "TYPE:" << (int)m.type << endl;
 		cursor += sizeof(m.type);
 		memcpy(&m.contentSize, this->payload.substr(cursor, sizeof(m.contentSize)).c_str(), sizeof(m.contentSize));
-		cout << "DEBUG: substring for content:" << m.contentSize << endl;
 		cursor += sizeof(m.contentSize);
 		if (m.type == SEND_SYM_KEY_MESSAGE_TYPE_CODE) {
-			cout << "DEBUG: trying to get sym key" << endl;
 			if (srcClient->publicKey.size() == 0) {
 				throw exception("you should pull the public key of the other client to decrypt the message.");
 			}
-			cout << "DEBUG: unencrypted symkey" << this->payload.substr(cursor, m.contentSize) << endl;
 			RSAPrivateWrapper rsapriv(this->getPrivateKeyFromInfoFile());
 			m.content = rsapriv.decrypt(this->payload.substr(cursor, m.contentSize));
-			const char* contentPtr = m.content.c_str();
 			srcClient->symKey = new unsigned char[AESWrapper::DEFAULT_KEYLENGTH];
-			memcpy(srcClient->symKey, contentPtr, AESWrapper::DEFAULT_KEYLENGTH);
-			cout << "DEBUG:got sym key from user. "; hexify(srcClient->symKey, AESWrapper::DEFAULT_KEYLENGTH); cout << endl;
+			memcpy(srcClient->symKey, m.content.c_str(), AESWrapper::DEFAULT_KEYLENGTH);
+		}
+		else if (m.type == GET_SYM_KEY_MESSAGE_TYPE_CODE) {
+			// no need for handling.
 		}
 		else if (srcClient->symKey == nullptr) {
-			cout << "DEBUG:: Couldn't decrypt the message!" << endl;
 			m.content = "Couldn't decrypt the message!";
 		}
 		else {
-			cout << "DEBUG: trying to read message" << endl;
 			AESWrapper aes(srcClient->symKey, AESWrapper::DEFAULT_KEYLENGTH);
-			cout << "encrypted :" << endl; hexify((const unsigned char*)this->payload.substr(cursor, m.contentSize).c_str(), m.contentSize); cout << endl;
-
 			m.content = aes.decrypt(this->payload.substr(cursor, m.contentSize).c_str(), m.contentSize);
 		}
 		cursor += m.contentSize;

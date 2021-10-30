@@ -9,14 +9,14 @@ using namespace std;
 class Message
 {
 public:
-	Message(string dstClientID, unsigned char type, string content = ""): dstClientID(dstClientID), type(type), content(content), contentSize(content.size()){}
+	Message(string dstClientID, unsigned char type, string content = "") : dstClientID(dstClientID), type(type), content(content), contentSize(content.size()) {}
 	Message() {}
 	string dstClientID;
 	string srcClientID;
 	string srcClientName;
-	unsigned int id;
-	unsigned char type;
-	unsigned int contentSize;
+	unsigned int id = 0;
+	unsigned char type = 0;
+	unsigned int contentSize = 0;
 	string content;
 	string packed();
 	friend ostream& operator<<(ostream& outs, const Message& m);
