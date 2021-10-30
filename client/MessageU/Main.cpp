@@ -23,7 +23,7 @@ void testRequest() {
 	cout << "\"" << req.packed() << "\"" << endl;
 	ClientCommunicator c;
 	ServerReply sr = c.makeRequest(req);
-	cout << "server reply:" << sr.code << sr.version  << sr.payloadSize << endl;
+	cout << "server reply:" << sr.code << sr.version << sr.payloadSize << endl;
 }
 
 
@@ -39,7 +39,7 @@ void testUserInter() {
 
 	vector<Message> messageList;
 	GetClientKeyRequestBuilder getClientPublicKey(clientList);
-	vector<RequestBuilder*> v = {&signup, &getClientList, &getClientPublicKey, &pullMessages, &getClientSymKey, &sendMessageRequest, &getClientSymKey, &sendSymKeyRequest};
+	vector<RequestBuilder*> v = { &signup, &getClientList, &getClientPublicKey, &pullMessages, &getClientSymKey, &sendMessageRequest, &getClientSymKey, &sendSymKeyRequest };
 	UserInteractor u(v);
 	string uuid;
 	while (true) {
@@ -54,26 +54,15 @@ void testUserInter() {
 			switch (sr.code) {
 			case (SIGNUP_SUCCESSFULL_CODE):
 				SuccessfullSignUpReplyHandler(sr.payload).handle();
-				cout << "successfull signup." << endl;
 				break;
 			case (GOT_CLIENT_PUBLIC_KEY):
 				ClientPublicKeyReplyHandler(sr.payload, clientList).handle();
-				cout << "got client public key." << endl;
 				break;
 			case (GOT_CLIENT_LIST_CODE):
 				clientList = ClientListReplyHandler(sr.payload).handle();
-				cout << "Got client list from server." << endl;
-				for (Client client : clientList) {
-					cout << "- " << client.name << endl;
-				}
 				break;
 			case (GOT_INCOMING_MESSAGES):
 				messageList = PullMessagesReplyHandler(sr.payload, clientList).handle();
-				for (Message m : messageList)
-				{
-					cout << m << endl;
-				}
-				cout << "got Messages from server." << endl;
 				break;
 			case(MESSAGE_SENT_SUCCESSFULLY):
 				cout << "message was sent successfully." << endl;
@@ -158,11 +147,11 @@ void testCryptoFunctions() {
 	file << privkey << endl;
 	string privkeyFromFile(getPrivateKeyFromInfoFileDemo("test_enc.txt"));
 	cout << "public key length:" << pubkey.size() << endl;
-	cout << "private key generated:" << privkey<< endl;
+	cout << "private key generated:" << privkey << endl;
 	cout << "private key from file: " << privkeyFromFile << endl;
 }
 
 int main() {
-	
+
 	testUserInter();
 }
