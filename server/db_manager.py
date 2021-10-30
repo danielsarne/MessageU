@@ -29,7 +29,7 @@ class DBManager:
 
     def _create_messages_table(self):
         self.cur.execute("""CREATE TABLE `messages` (
-            `id`	INTEGER NOT NULL UNIQUE,
+            `id`	BLOB NOT NULL UNIQUE,
             `to_client`	BLOB NOT NULL,
             `from_client`	BLOB NOT NULL,
             `type`	INTEGER NOT NULL,
@@ -57,11 +57,12 @@ class DBManager:
     def register_message(self, message: Message):
         self.cur.execute("INSERT INTO messages VALUES (?, ?, ?, ?, ?)",
                          (message.id, message.dst_client_uid, message.src_client_uid, message.type, message.content))
+        self.connection.commit()
 
     def pull_client_messages(self, uid):
         messages = [Message(*message_entry) for message_entry in
                     self.cur.execute("SELECT * FROM messages WHERE to_client=?", tuple([uid])).fetchall()]
-        self.cur.execute("DELETE * FROM messages WHERE to_client=?", tuple([uid]))
+        self.cur.execute("DELETE FROM messages WHERE to_client=?", tuple([uid]))
         return messages
 
     def __del__(self):

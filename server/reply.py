@@ -63,6 +63,7 @@ class MessagesListReply(ServerReply):
         self.payload = b''
         print(messages)
         for message in messages:
-            self.payload += struct.pack("<16sIHI{content_size}s".format(content_size=len(message.content)),
+            print("message content:", message.content)
+            self.payload += struct.pack("<16s4sBI{content_size}s".format(content_size=len(message.content)),
                                         message.src_client_uid, message.id, message.type, len(message.content),
                                         message.content)

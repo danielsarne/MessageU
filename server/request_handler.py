@@ -32,6 +32,7 @@ class SignUpRequestHandler(RequestHandler):
             raise UserExists(self.name)
         else:
             uid = self.server.register_user(self.name, self.public_key)
+            print(SuccessfullSignupReply(uid).get_bytes())
             return SuccessfullSignupReply(uid)
 
 

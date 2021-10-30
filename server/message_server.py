@@ -35,4 +35,5 @@ class MessageServer:
         uid = a2b_hex(md5(username.encode("utf-8")).hexdigest().encode("utf-8"))
         username = username.ljust(255, '\0')
         self.db_manager.register_user(uid, username, public_key)
+        print("DEBUG:", uid)
         return uid
