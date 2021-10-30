@@ -8,6 +8,9 @@
 
 using namespace std;
 
+/// <summary>
+/// a class That represents a request.
+/// </summary>
 class Request
 {
 private:
@@ -17,10 +20,11 @@ private:
 	unsigned int payloadSize;
 public:
 	Request(string clientID, unsigned char version, unsigned short code, string payload = "");
-	/*
-	 * The function returns a byte representation of the request
-	 */
 	string payload;
+	// <summary>
+	/// The function returns a byte representation of the request
+	/// </summary>
+	/// <returns>raw request</returns>
 	string packed();
 };
 

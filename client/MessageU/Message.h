@@ -6,6 +6,9 @@
 #define SEND_TEXT_MESSAGE_TYPE_CODE 3
 
 using namespace std;
+/// <summary>
+/// a class that represents a message.
+/// </summary>
 class Message
 {
 public:
@@ -18,6 +21,10 @@ public:
 	unsigned char type = 0;
 	unsigned int contentSize = 0;
 	string content;
+	/// <summary>
+	/// returns a string that returns the raw message value.
+	/// </summary>
+	/// <returns>raw message</returns>
 	string packed();
 	friend ostream& operator<<(ostream& outs, const Message& m);
 

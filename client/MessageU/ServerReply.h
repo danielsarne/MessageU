@@ -9,6 +9,9 @@
 #define GENERAL_ERROR_CODE 9000
 
 using namespace std;
+/// <summary>
+/// A class that represents the server reply for a request.
+/// </summary>
 class ServerReply
 {
 public:

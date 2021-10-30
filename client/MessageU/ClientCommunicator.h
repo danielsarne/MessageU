@@ -9,6 +9,9 @@ using  boost::asio::ip::tcp;
 
 const int MAX_REPLY_SEGMENT_LEN = 2048;
 
+/// <summary>
+/// a class that holds client-server  communcication functionallity.
+/// </summary>
 class ClientCommunicator
 {
 private:
@@ -16,25 +19,28 @@ private:
 	string serverPort;
 	tcp::iostream iostream;
 
-	/*
-	 * The function closes the socket and opens a new one.
-	 */
+	/// <summary>
+	/// The function closes the socket and opens a new one.
+	/// </summary>
 	void connect();
 
 	void close();
 
-	// void sendRequest();
 	ServerReply getServerReply();
 	void recvReplyHeader();
-	/*
-	 * After parsing the header will recv the server reply payload
-	 */
+
+	/// <summary>
+	/// After parsing the header will recv the server reply payload
+	/// </summary>
+	/// <param name="size"></param>
 	void recvReplyPayload(const unsigned int size);
 public:
 	ClientCommunicator();
-	/*
-	 * The function gets a request and returns the server reply.
-	 */
+	/// <summary>
+	/// The function gets a request and returns the server reply.
+	/// </summary>
+	/// <param name="request">sends the requests and returns the servers reply</param>
+	/// <returns></returns>
 	ServerReply makeRequest(Request request);
 };
 

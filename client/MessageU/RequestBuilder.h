@@ -24,12 +24,17 @@ using namespace std;
 
 string getLineFromIndex(string filename, int index);
 
-void hexify(const unsigned char* buffer, unsigned int length);
 
 
+/// <summary>
+/// A class that is used as a base class for all builders, which generate a client request.
+/// </summary>
 class RequestBuilder
 {
 protected:
+	/// <summary>
+	/// 
+	/// </summary>
 	string getPrivateKeyFromInfoFile();
 	string getUsernameFromInfoFile();
 	string getClientIDFromInfoFile();
@@ -38,8 +43,19 @@ public:
 	unsigned short code;
 	unsigned int version = 2;
 	string clientID;
-	virtual unsigned int getUserInpuId() const { return 0; }
-	virtual string getMenuString() const { return ""; };
+	/// <summary>
+	/// returns the input id for the given request.
+	/// </summary>
+	/// <returns></returns>
+	virtual unsigned int getUserInpuId() const = 0;
+	/// <summary>
+	/// returns the string to print for the application menu.
+	/// </summary>
+	virtual string getMenuString() const = 0;
+	/// <summary>
+	/// builds the the request according to builder params.
+	/// </summary>
+	/// <returns></returns>
 	virtual Request build();
 };
 
@@ -47,17 +63,19 @@ class SignUpRequestBuilder : public RequestBuilder {
 private:
 	string name;
 
-
 public:
 	SignUpRequestBuilder() : RequestBuilder(SIGNUP_CODE) {}
 	virtual Request build();
 	virtual unsigned int getUserInpuId() const { return SIGNUP_USER_INPUT_ID; }
 	virtual string getMenuString() const { return "Signup to the application"; }
 	string generatePublicKey();
+	/// <summary>
+	/// Generates uuid for first request.
+	/// </summary>
 	string generateUUID();
-	/*
-	 * The function takes the user info and writes it to the me.info file.
-	 */
+	/// <summary>
+	/// The function takes the user info and writes it to the me.info file.
+	/// </summary>
 	void saveGeneratedInfoToFile(string username, string publicKey);
 };
 
