@@ -6,7 +6,7 @@
 
 string Message::packed() {
 	string packedMessage = "";
-	packedMessage += this->dstClientID;
+	packedMessage += this->dstUserID;
 	append_to_string(packedMessage, this->type);
 	append_to_string(packedMessage, this->contentSize);
 	if (this->contentSize > 0) {
@@ -16,7 +16,7 @@ string Message::packed() {
 }
 
 ostream& operator<<(ostream& outs, const Message& m) {
-	cout << "From: " << m.srcClientName << endl;
+	cout << "From: " << m.srcUserName << endl;
 	cout << "Content:" << endl;
 	switch (m.type) {
 	case GET_SYM_KEY_MESSAGE_TYPE_CODE:

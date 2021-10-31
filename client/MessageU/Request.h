@@ -14,12 +14,12 @@ using namespace std;
 class Request
 {
 private:
-	string clientID;
+	string userID;
 	unsigned char version;
 	unsigned short code;
 	unsigned int payloadSize;
 public:
-	Request(string clientID, unsigned char version, unsigned short code, string payload = "");
+	Request(string userID, unsigned char version, unsigned short code, string payload = "");
 	string payload;
 	// <summary>
 	/// The function returns a byte representation of the request

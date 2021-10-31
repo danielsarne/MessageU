@@ -1,4 +1,4 @@
-#include "UserInteractor.h"
+#include "ClientInteractor.h"
 #include "RequestBuilder.h"
 #include "Consts.h"
 #include <stdio.h>
@@ -19,7 +19,7 @@ bool getIntFromUser(int& output) {
 	return true;
 }
 
-UserInteractor::UserInteractor(vector<RequestBuilder*>& requestBuilders): requestBuildersMap(){
+ClientInteractor::ClientInteractor(vector<RequestBuilder*>& requestBuilders): requestBuildersMap(){
 	for (const auto& requestBuilder : requestBuilders) {
 		this->requestBuildersMap[requestBuilder->getUserInpuId()] = requestBuilder;
 	}
@@ -27,12 +27,12 @@ UserInteractor::UserInteractor(vector<RequestBuilder*>& requestBuilders): reques
 
 
 template<typename T>  
-void UserInteractor::getUserStringReply(const string query, T reply) {
+void ClientInteractor::getUserStringReply(const string query, T reply) {
 	cout << query << "=> ";
 	cin >> reply;
 }
 
-void UserInteractor::printOptions() {
+void ClientInteractor::printOptions() {
 	cout << "Welcome To MessageU Application." << endl;
 	for (const auto& item : this->requestBuildersMap)
 	{
@@ -41,17 +41,17 @@ void UserInteractor::printOptions() {
 }
 
 
-Client* UserInteractor::getClientFromUser(vector<Client>& clientList) {
-	string name = UserInteractor::getNameFromUser();
-	while (find_if(clientList.begin(), clientList.end(), [name](Client c1) { return c1.name == name; }) == clientList.end()) {
+User* ClientInteractor::getUserFromUser(vector<User>& userList) {
+	string name = ClientInteractor::getNameFromUser();
+	while (find_if(userList.begin(), userList.end(), [name](User c1) { return c1.name == name; }) == userList.end()) {
 		cout << "Please Enter a name of a real user, that isn't you." << endl;
-		name = UserInteractor::getNameFromUser();
+		name = ClientInteractor::getNameFromUser();
 	}
-	return &*find_if(clientList.begin(), clientList.end(), [=](Client c1) {return c1.name == name; });
+	return &*find_if(userList.begin(), userList.end(), [=](User c1) {return c1.name == name; });
 	
 }
 
-string UserInteractor::getMessageContentFromUser() {
+string ClientInteractor::getMessageContentFromUser() {
 	string content;
 	cout << "enter a message ==>";
 	cin >> content;
@@ -64,7 +64,7 @@ string UserInteractor::getMessageContentFromUser() {
 	return content;
 }
 
-string UserInteractor::getNameFromUser() {
+string ClientInteractor::getNameFromUser() {
 	string username;
 	cout << "enter username ==>";
 	cin >> username;
@@ -78,7 +78,7 @@ string UserInteractor::getNameFromUser() {
 	return username;
 }
 
-int UserInteractor::getMainMenuUserReply() {
+int ClientInteractor::getMainMenuUserReply() {
 	int option;
 	this->printOptions();
 	while (!getIntFromUser(option) || (this->requestBuildersMap.count(option) == 0 && option != QUIT_APP_INT)) {

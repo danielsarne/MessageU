@@ -10,50 +10,50 @@
 
 
 using namespace std;
-void SuccessfullSignUpReplyHandler::saveClientIDToInfoFile(const string clientID) {
+void SuccessfullSignUpReplyHandler::saveUserIDToInfoFile(const string userID) {
 	ofstream infoFile(USER_INFO_FILE_NAME, ios::app);
-	infoFile << Base64Wrapper::encode(clientID) << endl;
+	infoFile << Base64Wrapper::encode(userID) << endl;
 }
 
 void SuccessfullSignUpReplyHandler::handle() {
-	SuccessfullSignUpReplyHandler::saveClientIDToInfoFile(this->uid);
+	SuccessfullSignUpReplyHandler::saveUserIDToInfoFile(this->uid);
 	cout << "successfull signup." << endl;
 }
 
-ClientListReplyHandler::ClientListReplyHandler(string payload) {
+UserListReplyHandler::UserListReplyHandler(string payload) {
 	this->payload = payload;
 }
 
-vector<Client> ClientListReplyHandler::handle() {
-	vector<Client> appClients;
-	string clientPayloadSubstring;
+vector<User> UserListReplyHandler::handle() {
+	vector<User> appUsers;
+	string userPayloadSubstring;
 	string uid;
-	string clientName;
-	const int clientInfoChunkLen = MAX_USERNAME_LEN + 1 + UUID_LEN;
-	int clientsCount = this->payload.size() / clientInfoChunkLen;
-	for (int i = 0; i < clientsCount; i++) {
-		clientPayloadSubstring = this->payload.substr(i * clientInfoChunkLen, clientInfoChunkLen);
-		uid = clientPayloadSubstring.substr(0, UUID_LEN);
-		clientName = clientPayloadSubstring.substr(UUID_LEN, MAX_USERNAME_LEN + 1);
-		appClients.push_back(Client(uid, clientName));
+	string userName;
+	const int userInfoChunkLen = MAX_USERNAME_LEN + 1 + UUID_LEN;
+	int usersCount = this->payload.size() / userInfoChunkLen;
+	for (int i = 0; i < usersCount; i++) {
+		userPayloadSubstring = this->payload.substr(i * userInfoChunkLen, userInfoChunkLen);
+		uid = userPayloadSubstring.substr(0, UUID_LEN);
+		userName = userPayloadSubstring.substr(UUID_LEN, MAX_USERNAME_LEN + 1);
+		appUsers.push_back(User(uid, userName));
 	}
-	cout << "Got client list from server." << endl;
-	for (Client client : appClients) {
-		cout << "- " << client.name << endl;
+	cout << "Got user list from server." << endl;
+	for (User user : appUsers) {
+		cout << "- " << user.name << endl;
 	}
-	return appClients;
+	return appUsers;
 }
 
 
-ClientPublicKeyReplyHandler::ClientPublicKeyReplyHandler(string payload, vector<Client>& clientList) {
-	string clientID = payload.substr(0, UUID_LEN);
-	this->client = &*find_if(clientList.begin(), clientList.end(), [=](Client c1) {return c1.uid == clientID; });
+UserPublicKeyReplyHandler::UserPublicKeyReplyHandler(string payload, vector<User>& userList) {
+	string userID = payload.substr(0, UUID_LEN);
+	this->user = &*find_if(userList.begin(), userList.end(), [=](User c1) {return c1.uid == userID; });
 	this->publicKey = payload.substr(UUID_LEN, PUBLIC_KEY_LEN);
 }
 
-void ClientPublicKeyReplyHandler::handle() {
-	this->client->publicKey = this->publicKey;
-	cout << "got client public key." << endl;
+void UserPublicKeyReplyHandler::handle() {
+	this->user->publicKey = this->publicKey;
+	cout << "got user public key." << endl;
 }
 
 string PullMessagesReplyHandler::getPrivateKeyFromInfoFile() {
@@ -74,12 +74,12 @@ vector<Message> PullMessagesReplyHandler::handle() {
 	unsigned int cursor = 0;
 	Message m;
 	while (cursor < this->payload.size()) {
-		m.srcClientID = this->payload.substr(cursor, UUID_LEN);
+		m.srcUserID = this->payload.substr(cursor, UUID_LEN);
 		cursor += UUID_LEN;
 		// TODO: handle endianess.
 		m.id = reinterpret_cast<unsigned int>(this->payload.substr(cursor, sizeof(m.id)).c_str());
-		Client* srcClient = &*find_if(clientList.begin(), clientList.end(), [=](Client c1) {return c1.uid == m.srcClientID; });
-		m.srcClientName = srcClient->name;
+		User* srcUser = &*find_if(userList.begin(), userList.end(), [=](User c1) {return c1.uid == m.srcUserID; });
+		m.srcUserName = srcUser->name;
 		cursor += sizeof(m.id);
 
 		m.type = this->payload.c_str()[cursor];
@@ -89,22 +89,22 @@ vector<Message> PullMessagesReplyHandler::handle() {
 		cursor += sizeof(m.contentSize);
 
 		if (m.type == SEND_SYM_KEY_MESSAGE_TYPE_CODE) {
-			if (srcClient->publicKey.size() == 0) {
-				throw exception("you should pull the public key of the other client to decrypt the message.");
+			if (srcUser->publicKey.size() == 0) {
+				throw exception("you should pull the public key of the other user to decrypt the message.");
 			}
 			RSAPrivateWrapper rsapriv(this->getPrivateKeyFromInfoFile());
 			m.content = rsapriv.decrypt(this->payload.substr(cursor, m.contentSize));
-			srcClient->symKey = new unsigned char[AESWrapper::DEFAULT_KEYLENGTH];
-			memcpy(srcClient->symKey, m.content.c_str(), AESWrapper::DEFAULT_KEYLENGTH);
+			srcUser->symKey = new unsigned char[AESWrapper::DEFAULT_KEYLENGTH];
+			memcpy(srcUser->symKey, m.content.c_str(), AESWrapper::DEFAULT_KEYLENGTH);
 		}
 		else if (m.type == GET_SYM_KEY_MESSAGE_TYPE_CODE) {
 			// no need for handling.
 		}
-		else if (srcClient->symKey == nullptr) {
+		else if (srcUser->symKey == nullptr) {
 			m.content = "Couldn't decrypt the message!";
 		}
 		else {
-			AESWrapper aes(srcClient->symKey, AESWrapper::DEFAULT_KEYLENGTH);
+			AESWrapper aes(srcUser->symKey, AESWrapper::DEFAULT_KEYLENGTH);
 			m.content = aes.decrypt(this->payload.substr(cursor, m.contentSize).c_str(), m.contentSize);
 		}
 		cursor += m.contentSize;

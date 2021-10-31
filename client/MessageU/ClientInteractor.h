@@ -1,6 +1,6 @@
 #pragma once
 #include "RequestBuilder.h"
-#include "Client.h"
+#include "User.h"
 #include <stdio.h>
 #include <string>
 #include <map>
@@ -10,16 +10,16 @@ using namespace std;
 /// <summary>
 /// a class that manages user interaction.
 /// </summary>
-class UserInteractor
+class ClientInteractor
 {
 private:
 	/// <summary>
-	/// print client different menu options.
+	/// print user different menu options.
 	/// </summary>
 	void printOptions();
 
 public:
-	UserInteractor(vector<RequestBuilder*>& requestBuilders);
+	ClientInteractor(vector<RequestBuilder*>& requestBuilders);
 	/// <summary>
 	/// The function prints the queryand gets the user reply.
 	/// </summary>
@@ -34,10 +34,10 @@ public:
 	static string getNameFromUser();
 	static string getMessageContentFromUser();
 	/// <summary>
-	/// The function gets a client from user intpu
+	/// The function gets a user from user intpu
 	/// </summary>
-	/// <param name="clientList"> a vector of clients</param>
-	/// <returns> a pointer to the given client.</returns>
-	static Client* getClientFromUser(vector<Client>& clientList);
+	/// <param name="userList"> a vector of users</param>
+	/// <returns> a pointer to the given user.</returns>
+	static User* getUserFromUser(vector<User>& userList);
 };
 

@@ -3,7 +3,7 @@
 #include "Request.h"
 #include "RSAWrapper.h"
 #include "AESWrapper.h"
-#include "UserInteractor.h"
+#include "ClientInteractor.h"
 #include "Message.h"
 #include "Consts.h"
 #include <iostream>
@@ -29,8 +29,8 @@ RequestBuilder::RequestBuilder(unsigned short code): code(code){
 }
 
 Request RequestBuilder::build() {
-	this->clientID = this->getClientIDFromInfoFile();
-	return Request(this->clientID, this->version, this->code);
+	this->userID = this->getUserIDFromInfoFile();
+	return Request(this->userID, this->version, this->code);
 }
 
 
@@ -45,7 +45,7 @@ string getLineFromIndex(string filename, int index) {
 	throw exception("error reading from file.");
 }
 
-string RequestBuilder::getClientIDFromInfoFile() {
+string RequestBuilder::getUserIDFromInfoFile() {
 	return Base64Wrapper::decode(getLineFromIndex(USER_INFO_FILE_NAME, 2));
 }
 
@@ -70,39 +70,39 @@ string SignUpRequestBuilder::generateUUID() {
 
 Request SignUpRequestBuilder::build() {
 	RSAPrivateWrapper privateKey;
-	string name = UserInteractor::getNameFromUser();
+	string name = ClientInteractor::getNameFromUser();
 	string publicKey = privateKey.getPublicKey();
-	this->clientID = generateUUID();
+	this->userID = generateUUID();
 	this->saveGeneratedInfoToFile(name, privateKey.getPrivateKey());
 	string payload = name + publicKey;
-	return Request(this->clientID, this->version, this->code, payload);
+	return Request(this->userID, this->version, this->code, payload);
 }
 
 
-Request GetClientKeyRequestBuilder::build() {
-	this->clientID = this->getClientIDFromInfoFile();
+Request GetUserKeyRequestBuilder::build() {
+	this->userID = this->getUserIDFromInfoFile();
 	string payload;
-	Client* c = UserInteractor::getClientFromUser(this->clientList);
+	User* c = ClientInteractor::getUserFromUser(this->userList);
 	payload = c->uid;
-	return Request(this->clientID, this->version, this->code, payload);
+	return Request(this->userID, this->version, this->code, payload);
 }
 
 Request AbstractMessageRequestBuilder::build() {
-	this->clientID = this->getClientIDFromInfoFile();
-	return Request(this->clientID, this->version, this->code, message.packed());
+	this->userID = this->getUserIDFromInfoFile();
+	return Request(this->userID, this->version, this->code, message.packed());
 }
 
-Request GetClientSymKeyRequestBuilder::build() {
-	Client* peer = UserInteractor::getClientFromUser(this->clientList);
+Request GetUserSymKeyRequestBuilder::build() {
+	User* peer = ClientInteractor::getUserFromUser(this->userList);
 	this->message = Message(peer->uid, this->messageType);
 	return AbstractMessageRequestBuilder::build();
 	
 }
 
-Request SendClientSymKeyRequestBuilder::build() {
-	Client* peer = UserInteractor::getClientFromUser(this->clientList);
+Request SendUserSymKeyRequestBuilder::build() {
+	User* peer = ClientInteractor::getUserFromUser(this->userList);
 	if (peer->publicKey.size() == 0) {
-		throw exception("To send sym key you need to pull clients public asym key.(option 30)");
+		throw exception("To send sym key you need to pull users public asym key.(option 30)");
 	}
 	if (peer->symKey == nullptr) {
 		unsigned char key[AESWrapper::DEFAULT_KEYLENGTH];
@@ -116,12 +116,12 @@ Request SendClientSymKeyRequestBuilder::build() {
 }
 
 Request SendMessageRequestBuilder::build() {
-	Client* peer = UserInteractor::getClientFromUser(this->clientList);
+	User* peer = ClientInteractor::getUserFromUser(this->userList);
 	if (peer->symKey == nullptr) {
-		throw exception("To send a message you need to get client's sym key.(option 51)");
+		throw exception("To send a message you need to get user's sym key.(option 51)");
 	}
 	AESWrapper aesEncryptor(peer->symKey, AESWrapper::DEFAULT_KEYLENGTH);
-	string messageContent = UserInteractor::getMessageContentFromUser();
+	string messageContent = ClientInteractor::getMessageContentFromUser();
 	string encrypted = aesEncryptor.encrypt(messageContent.c_str(), messageContent.size()).c_str();
 	this->message = Message(peer->uid, this->messageType, aesEncryptor.encrypt(messageContent.c_str(), messageContent.size()));
 	return AbstractMessageRequestBuilder::build();

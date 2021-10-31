@@ -10,7 +10,7 @@ using  boost::asio::ip::tcp;
 const int MAX_REPLY_SEGMENT_LEN = 2048;
 
 /// <summary>
-/// a class that holds client-server  communcication functionallity.
+/// a class that holds user-server  communcication functionallity.
 /// </summary>
 class ClientCommunicator
 {

@@ -3,13 +3,13 @@
 #include <string>
 using namespace std;
 /// <summary>
-/// a class that represents a client.
+/// a class that represents a user.
 /// </summary>
-class Client
+class User
 {
 public:
-	Client(string uid, string name) : uid(uid), name(name), symKey(nullptr) {}
-	~Client() { delete[] symKey; }
+	User(string uid, string name) : uid(uid), name(name), symKey(nullptr) {}
+	~User() { delete[] symKey; }
 	string name;
 	string uid;
 	string publicKey;

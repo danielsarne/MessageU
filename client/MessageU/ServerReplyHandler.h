@@ -1,5 +1,5 @@
 #pragma once
-#include "Client.h"
+#include "User.h"
 #include "Message.h"
 #include <string>
 #include <vector>
@@ -11,35 +11,35 @@ using namespace std;
 class SuccessfullSignUpReplyHandler {
 private:
 	string uid;
-	static void saveClientIDToInfoFile(const string clientID);
+	static void saveUserIDToInfoFile(const string userID);
 public:
 	const unsigned int code = 2000;
 	SuccessfullSignUpReplyHandler(string payload) { this->uid = payload;}
 	void handle();
 };
 
-class ClientListReplyHandler {
+class UserListReplyHandler {
 private:
 	string payload;
 public:
 	const unsigned int code = 2001;
-	ClientListReplyHandler(string payload);
+	UserListReplyHandler(string payload);
 	/// <summary>
-	/// returns a list of clients that was given by the server.
+	/// returns a list of users that was given by the server.
 	/// </summary>
 	/// <returns></returns>
-	vector<Client> handle();
+	vector<User> handle();
 };
 
-class ClientPublicKeyReplyHandler {
+class UserPublicKeyReplyHandler {
 private:
 	string publicKey;
-	Client* client;
+	User* user;
 public:
 	const unsigned int code = 2002;
-	ClientPublicKeyReplyHandler(string payload, vector<Client>& clientList);
+	UserPublicKeyReplyHandler(string payload, vector<User>& userList);
 	/// <summary>
-	/// updates the client's public key in the client list.
+	/// updates the user's public key in the user list.
 	/// </summary>
 	void handle();
 };
@@ -48,9 +48,9 @@ class PullMessagesReplyHandler {
 private:
 	string getPrivateKeyFromInfoFile();
 	string payload;
-	vector<Client>& clientList;
+	vector<User>& userList;
 public:
-	PullMessagesReplyHandler(string payload, vector<Client>& clientList) : payload(payload), clientList(clientList) {}
+	PullMessagesReplyHandler(string payload, vector<User>& userList) : payload(payload), userList(userList) {}
 	/// <summary>
 	/// parses all messages that were pulled from the server.
 	/// </summary>

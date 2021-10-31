@@ -12,11 +12,11 @@ using namespace std;
 class Message
 {
 public:
-	Message(string dstClientID, unsigned char type, string content = "") : dstClientID(dstClientID), type(type), content(content), contentSize(content.size()) {}
+	Message(string dstUserID, unsigned char type, string content = "") : dstUserID(dstUserID), type(type), content(content), contentSize(content.size()) {}
 	Message() {}
-	string dstClientID;
-	string srcClientID;
-	string srcClientName;
+	string dstUserID;
+	string srcUserID;
+	string srcUserName;
 	unsigned int id = 0;
 	unsigned char type = 0;
 	unsigned int contentSize = 0;

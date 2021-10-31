@@ -1,7 +1,7 @@
 #include "ClientCommunicator.h"
 #include "Request.h"
 #include "ServerReply.h"
-#include "UserInteractor.h"
+#include "ClientInteractor.h"
 #include "RequestBuilder.h"
 #include "ServerReplyHandler.h"
 #include "RSAWrapper.h"
@@ -28,19 +28,19 @@ void testRequest() {
 
 
 void testUserInter() {
-	vector<Client> clientList;
+	vector<User> userList;
 	ClientCommunicator c;
 	SignUpRequestBuilder signup;
-	GetClientListRequestBuilder getClientList;
+	GetUserListRequestBuilder getUserList;
 	PullMessagesRequestBuilder pullMessages;
-	GetClientSymKeyRequestBuilder getClientSymKey(clientList);
-	SendMessageRequestBuilder sendMessageRequest(clientList);
-	SendClientSymKeyRequestBuilder sendSymKeyRequest(clientList);
+	GetUserSymKeyRequestBuilder getUserSymKey(userList);
+	SendMessageRequestBuilder sendMessageRequest(userList);
+	SendUserSymKeyRequestBuilder sendSymKeyRequest(userList);
 
 	vector<Message> messageList;
-	GetClientKeyRequestBuilder getClientPublicKey(clientList);
-	vector<RequestBuilder*> v = { &signup, &getClientList, &getClientPublicKey, &pullMessages, &getClientSymKey, &sendMessageRequest, &getClientSymKey, &sendSymKeyRequest };
-	UserInteractor u(v);
+	GetUserKeyRequestBuilder getUserPublicKey(userList);
+	vector<RequestBuilder*> v = { &signup, &getUserList, &getUserPublicKey, &pullMessages, &getUserSymKey, &sendMessageRequest, &getUserSymKey, &sendSymKeyRequest };
+	ClientInteractor u(v);
 	string uuid;
 	while (true) {
 		try {
@@ -56,13 +56,13 @@ void testUserInter() {
 				SuccessfullSignUpReplyHandler(sr.payload).handle();
 				break;
 			case (GOT_CLIENT_PUBLIC_KEY):
-				ClientPublicKeyReplyHandler(sr.payload, clientList).handle();
+				UserPublicKeyReplyHandler(sr.payload, userList).handle();
 				break;
 			case (GOT_CLIENT_LIST_CODE):
-				clientList = ClientListReplyHandler(sr.payload).handle();
+				userList = UserListReplyHandler(sr.payload).handle();
 				break;
 			case (GOT_INCOMING_MESSAGES):
-				messageList = PullMessagesReplyHandler(sr.payload, clientList).handle();
+				messageList = PullMessagesReplyHandler(sr.payload, userList).handle();
 				break;
 			case(MESSAGE_SENT_SUCCESSFULLY):
 				cout << "message was sent successfully." << endl;
