@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <exception>
-#include <map>
 
 bool getIntFromUser(int& output) {
 	try {
@@ -19,14 +18,14 @@ bool getIntFromUser(int& output) {
 	return true;
 }
 
-ClientInteractor::ClientInteractor(vector<RequestBuilder*>& requestBuilders): requestBuildersMap(){
+ClientInteractor::ClientInteractor(vector<RequestBuilder*>& requestBuilders) : requestBuildersMap() {
 	for (const auto& requestBuilder : requestBuilders) {
 		this->requestBuildersMap[requestBuilder->getUserInpuId()] = requestBuilder;
 	}
 }
 
 
-template<typename T>  
+template<typename T>
 void ClientInteractor::getUserStringReply(const string query, T reply) {
 	cout << query << "=> ";
 	cin >> reply;
@@ -43,12 +42,12 @@ void ClientInteractor::printOptions() {
 
 User* ClientInteractor::getUserFromUser(vector<User>& userList) {
 	string name = ClientInteractor::getNameFromUser();
-	while (find_if(userList.begin(), userList.end(), [name](User c1) { return c1.name == name; }) == userList.end()) {
+	vector<User>::iterator iter = find_if(userList.begin(), userList.end(), [name](User user) {return user.name == name; });
+	while (iter == userList.end()) {
 		cout << "Please Enter a name of a real user, that isn't you." << endl;
 		name = ClientInteractor::getNameFromUser();
 	}
-	return &*find_if(userList.begin(), userList.end(), [=](User c1) {return c1.name == name; });
-	
+	return &*iter;
 }
 
 string ClientInteractor::getMessageContentFromUser() {
@@ -60,7 +59,7 @@ string ClientInteractor::getMessageContentFromUser() {
 		cout << "enter a message ==>";
 		getline(cin, content);
 	}
-	
+
 	return content;
 }
 
@@ -83,6 +82,6 @@ int ClientInteractor::getMainMenuUserReply() {
 	this->printOptions();
 	while (!getIntFromUser(option) || (this->requestBuildersMap.count(option) == 0 && option != QUIT_APP_INT)) {
 		cerr << "Error in input, Must choose option from menu" << endl << "=>";
-	} 
+	}
 	return option;
 }

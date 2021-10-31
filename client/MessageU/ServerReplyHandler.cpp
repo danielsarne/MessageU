@@ -47,7 +47,7 @@ vector<User> UserListReplyHandler::handle() {
 
 UserPublicKeyReplyHandler::UserPublicKeyReplyHandler(string payload, vector<User>& userList) {
 	string userID = payload.substr(0, UUID_LEN);
-	this->user = &*find_if(userList.begin(), userList.end(), [=](User c1) {return c1.uid == userID; });
+	this->user = &*find_if(userList.begin(), userList.end(), [=](User user) {return user.uid == userID; });
 	this->publicKey = payload.substr(UUID_LEN, PUBLIC_KEY_LEN);
 }
 
@@ -78,7 +78,7 @@ vector<Message> PullMessagesReplyHandler::handle() {
 		cursor += UUID_LEN;
 		// TODO: handle endianess.
 		m.id = reinterpret_cast<unsigned int>(this->payload.substr(cursor, sizeof(m.id)).c_str());
-		User* srcUser = &*find_if(userList.begin(), userList.end(), [=](User c1) {return c1.uid == m.srcUserID; });
+		User* srcUser = &*find_if(userList.begin(), userList.end(), [=](User user) {return user.uid == m.srcUserID; });
 		m.srcUserName = srcUser->name;
 		cursor += sizeof(m.id);
 

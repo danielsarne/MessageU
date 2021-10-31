@@ -24,8 +24,6 @@ using namespace std;
 
 string getLineFromIndex(string filename, int index);
 
-
-
 /// <summary>
 /// A class that is used as a base class for all builders, which generate a user request.
 /// </summary>
@@ -41,7 +39,7 @@ protected:
 public:
 	RequestBuilder(unsigned short code);
 	unsigned short code;
-	unsigned int version = 2;
+	unsigned char version = 2;
 	string userID;
 	/// <summary>
 	/// returns the input id for the given request.
@@ -111,7 +109,6 @@ protected:
 	vector<User>& userList;
 public:
 	AbstractMessageRequestBuilder(vector<User>& userList) : RequestBuilder(SEND_MESSAGE_CODE), userList(userList) {}
-	unsigned int code = SEND_MESSAGE_CODE;
 	virtual Request build();
 };
 

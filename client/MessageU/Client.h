@@ -16,7 +16,6 @@ private:
 	ClientInteractor* interactor;
 public:
 	Client();
-	~Client();
 	/// <summary>
 	/// The function runs the logics of the client.
 	/// </summary>

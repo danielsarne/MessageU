@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <bit>
 #include <boost/asio.hpp>
 
 #define read_from_stream(stream, var) \
@@ -15,7 +16,7 @@
 ClientCommunicator::ClientCommunicator() {
 	string serverInfoStr;
 	ifstream serverInfoFile;
-	
+
 	serverInfoFile.open("server.info");
 	getline(serverInfoFile, serverInfoStr);
 	serverInfoFile.close();
@@ -23,7 +24,7 @@ ClientCommunicator::ClientCommunicator() {
 	size_t delimeterIndex = serverInfoStr.find(":");
 	this->serverAddr = serverInfoStr.substr(0, delimeterIndex);
 	this->serverPort = serverInfoStr.substr(delimeterIndex + 1);
-	cout << this->serverAddr << ":" << this->serverPort << endl;
+	cout << " Connecting to Server: " << this->serverAddr << ":" << this->serverPort << endl;
 }
 
 void ClientCommunicator::connect() {

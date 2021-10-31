@@ -14,12 +14,6 @@ Client::Client() {
 	this->requestBuilders = { signup, getUserList, getUserPublicKey, pullMessages, getUserSymKey, sendMessageRequest, getUserSymKey, sendSymKeyRequest };
 	this->interactor = new ClientInteractor(this->requestBuilders);
 }
-Client::~Client() {
-	for (auto builder : this->requestBuilders) {
-		delete builder;
-	}
-	delete this->interactor;
-}
 
 void Client::run() {
 	while (true) {
@@ -36,13 +30,13 @@ void Client::run() {
 				SuccessfullSignUpReplyHandler(sr.payload).handle();
 				break;
 			case (GOT_CLIENT_PUBLIC_KEY):
-				UserPublicKeyReplyHandler(sr.payload, userList).handle();
+				UserPublicKeyReplyHandler(sr.payload,this->userList).handle();
 				break;
 			case (GOT_CLIENT_LIST_CODE):
 				this->userList = UserListReplyHandler(sr.payload).handle();
 				break;
 			case (GOT_INCOMING_MESSAGES):
-				this->messageList = PullMessagesReplyHandler(sr.payload, userList).handle();
+				this->messageList = PullMessagesReplyHandler(sr.payload, this->userList).handle();
 				break;
 			case(MESSAGE_SENT_SUCCESSFULLY):
 				cout << "message was sent successfully." << endl;
